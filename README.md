@@ -44,3 +44,15 @@ Architecture:
 
 Current Version:
 0.1.0
+
+=========================================
+        Canal-Mardukh™
+     Part of Mardukh System™
+
+ Version : 0.1.0 Alpha
+
+ Copyright (C) 2026
+ Seliim Ahmed
+=========================================
+
+
