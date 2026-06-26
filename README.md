@@ -65,3 +65,17 @@ Copyright © 2026
 Seliim Ahmed
 All Rights Reserved
 
+
+====================================================
+             Canal-Mardukh™
+
+        Part of Mardukh System™
+
+          Version 0.1.0 Alpha
+
+        Designed by Seliim Ahmed
+
+          Copyright © 2026
+          All Rights Reserved
+====================================================
+
