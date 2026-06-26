@@ -56,3 +56,12 @@ Current Version:
 =========================================
 
 
+Canal-Mardukh™
+Version 0.1.0 Alpha
+
+Build 0001
+
+Copyright © 2026
+Seliim Ahmed
+All Rights Reserved
+
