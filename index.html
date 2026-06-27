@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canal-Mardukh™</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0d0d0d;
+            color: #F5F5F5;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            text-align: center;
+            border: 2px solid #A66A00;
+            border-radius: 16px;
+            padding: 40px;
+            background: rgba(0, 0, 0, 0.85);
+            box-shadow: 0 0 60px rgba(166, 106, 0, 0.15);
+        }
+
+        .header {
+            border-bottom: 1px solid #A66A00;
+            padding-bottom: 20px;
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            color: #FFD27A;
+            letter-spacing: 3px;
+            text-shadow: 0 0 20px rgba(255, 210, 122, 0.2);
+        }
+
+        h1 small {
+            font-size: 1rem;
+            color: #888;
+            display: block;
+            letter-spacing: 1px;
+        }
+
+        .subtitle {
+            color: #FFD27A;
+            font-weight: normal;
+            font-size: 1rem;
+            margin-top: 5px;
+            letter-spacing: 2px;
+        }
+
+        .status {
+            color: #7CFC7C;
+            font-weight: bold;
+            margin: 15px 0;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+        }
+
+        .status .dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #7CFC7C;
+            animation: pulse 1.5s ease-in-out infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* ============================================================
+           DIAL COUNTER
+           ============================================================ */
+        .dial-section {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid #222;
+            border-radius: 12px;
+            padding: 25px 20px;
+            margin: 20px 0;
+        }
+
+        .dial-counter {
+            font-size: 5rem;
+            font-weight: bold;
+            color: #FFD27A;
+            font-family: 'Courier New', monospace;
+            text-shadow: 0 0 30px rgba(255, 210, 122, 0.15);
+            letter-spacing: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .dial-counter .highlight {
+            color: #00ff88;
+            text-shadow: 0 0 40px rgba(0, 255, 136, 0.2);
+        }
+
+        .dial-label {
+            font-size: 0.75rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 5px;
+        }
+
+        .dial-stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .dial-stats .stat {
+            text-align: center;
+        }
+
+        .dial-stats .stat .value {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #FFD27A;
+            font-family: 'Courier New', monospace;
+        }
+
+        .dial-stats .stat .label {
+            font-size: 0.6rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .dial-stats .stat .value.accepted {
+            color: #7CFC7C;
+        }
+
+        .dial-stats .stat .value.rejected {
+            color: #ff6b6b;
+        }
+
+        /* ============================================================
+           RUNNING WINDOW (LIVE LOG)
+           ============================================================ */
+        .log-window {
+            background: #0a0a0a;
+            border: 1px solid #1a1a1a;
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin: 15px 0 20px;
+            min-height: 200px;
+            max-height: 280px;
+            overflow-y: auto;
+            text-align: left;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            line-height: 1.8;
+            color: #aaa;
+        }
+
+        .log-window::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .log-window::-webkit-scrollbar-track {
+            background: #0a0a0a;
+        }
+
+        .log-window::-webkit-scrollbar-thumb {
+            background: #A66A00;
+            border-radius: 4px;
+        }
+
+        .log-entry {
+            padding: 2px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .log-entry .time {
+            color: #555;
+            margin-right: 10px;
+        }
+
+        .log-entry .accepted {
+            color: #7CFC7C;
+        }
+
+        .log-entry .rejected {
+            color: #ff6b6b;
+        }
+
+        .log-entry .submitted {
+            color: #FFD27A;
+        }
+
+        .log-entry .deposited {
+            color: #00ff88;
+        }
+
+        .log-entry .info {
+            color: #66ccff;
+        }
+
+        /* ============================================================
+           BUTTONS
+           ============================================================ */
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 15px 0;
+        }
+
+        button {
+            background: transparent;
+            color: #F5F5F5;
+            border: 1px solid #444;
+            padding: 12px 28px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            letter-spacing: 1px;
+        }
+
+        button:hover {
+            background: rgba(166, 106, 0, 0.2);
+            border-color: #A66A00;
+            transform: translateY(-2px);
+        }
+
+        button.primary {
+            border-color: #A66A00;
+            color: #FFD27A;
+        }
+
+        button.primary:hover {
+            background: rgba(166, 106, 0, 0.3);
+            box-shadow: 0 0 30px rgba(166, 106, 0, 0.1);
+        }
+
+        button.success {
+            border-color: #2a6a3a;
+            color: #7CFC7C;
+        }
+
+        button.success:hover {
+            background: rgba(42, 106, 58, 0.2);
+            box-shadow: 0 0 30px rgba(124, 252, 124, 0.05);
+        }
+
+        button.danger {
+            border-color: #6a2a2a;
+            color: #ff6b6b;
+        }
+
+        button.danger:hover {
+            background: rgba(106, 42, 42, 0.2);
+        }
+
+        button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* ============================================================
+           ATM BUTTONS (SEND / RECEIVE / PAY)
+           ============================================================ */
+        .atm-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 10px 0 5px;
+        }
+
+        .atm-group button {
+            padding: 10px 20px;
+            font-size: 0.75rem;
+            border-color: #333;
+        }
+
+        .atm-group button.gold {
+            border-color: #A66A00;
+            color: #FFD27A;
+        }
+
+        .atm-group button.green {
+            border-color: #2a6a3a;
+            color: #7CFC7C;
+        }
+
+        .atm-group button.blue {
+            border-color: #1a4a6a;
+            color: #66ccff;
+        }
+
+        .atm-group button:hover {
+            transform: translateY(-2px);
+        }
+
+        /* ============================================================
+           FOOTER
+           ============================================================ */
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #1a1a1a;
+            font-size: 0.8rem;
+            color: #666;
+            letter-spacing: 0.5px;
+        }
+
+        .footer strong {
+            color: #FFD27A;
+        }
+
+        /* ============================================================
+           ATM POPUP
+           ============================================================ */
+        .atm-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.92);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            backdrop-filter: blur(4px);
+        }
+
+        .atm-overlay.active {
+            display: flex;
+        }
+
+        .atm-box {
+            background: #111;
+            border: 2px solid #A66A00;
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 420px;
+            width: 92%;
+            box-shadow: 0 0 60px rgba(166, 106, 0, 0.1);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            0% { transform: scale(0.9); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .atm-box h2 {
+            color: #FFD27A;
+            font-size: 1.4rem;
+            border-bottom: 1px solid #222;
+            padding-bottom: 12px;
+            margin-bottom: 15px;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+
+        .atm-field {
+            margin-bottom: 12px;
+            text-align: left;
+        }
+
+        .atm-field label {
+            display: block;
+            font-size: 0.7rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        .atm-field input,
+        .atm-field select {
+            width: 100%;
+            padding: 10px 14px;
+            background: #0a0a0a;
+            border: 1px solid #222;
+            border-radius: 6px;
+            color: #F5F5F5;
+            font-size: 0.9rem;
+            outline: none;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        .atm-field input:focus,
+        .atm-field select:focus {
+            border-color: #A66A00;
+        }
+
+        .atm-counter {
+            background: #0a0a0a;
+            border: 1px dashed #A66A00;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            margin: 15px 0;
+        }
+
+        .atm-counter .count-number {
+            font-family: 'Courier New', monospace;
+            color: #FFD27A;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .atm-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .atm-actions button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .atm-actions .atm-confirm {
+            background: #2a6a3a;
+            color: #fff;
+        }
+
+        .atm-actions .atm-confirm:hover {
+            background: #3a7a4a;
+        }
+
+        .atm-actions .atm-cancel {
+            background: #3a2a2a;
+            color: #fff;
+        }
+
+        .atm-actions .atm-cancel:hover {
+            background: #4a3a3a;
+        }
+
+        @media (max-width: 600px) {
+            .container { padding: 20px; }
+            h1 { font-size: 2rem; }
+            .dial-counter { font-size: 3.5rem; }
+            .dial-stats { gap: 20px; }
+            .dial-stats .stat .value { font-size: 1.1rem; }
+        }
+
+        @media (max-width: 400px) {
+            h1 { font-size: 1.6rem; }
+            .dial-counter { font-size: 2.8rem; }
+            .atm-box { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============================================================
+    ATM POPUP
+    ============================================================ -->
+    <div class="atm-overlay" id="atmOverlay">
+        <div class="atm-box">
+            <h2>🌍 HUNDI TRANSFER</h2>
+            <div class="atm-field">
+                <label>👤 Sender Name</label>
+                <input type="text" id="atmSender" value="Seliim Ahmed">
+            </div>
+            <div class="atm-field">
+                <label>📤 Receiver Name</label>
+                <input type="text" id="atmReceiverName" placeholder="Receiver full name">
+            </div>
+            <div class="atm-field">
+                <label>📬 Receiver Account / Wallet</label>
+                <input type="text" id="atmReceiverAccount" placeholder="Account or wallet string">
+            </div>
+            <div class="atm-field">
+                <label>💰 Amount</label>
+                <input type="number" id="atmAmount" placeholder="0.00" step="any">
+            </div>
+            <div class="atm-field">
+                <label>💱 Currency</label>
+                <select id="atmCurrency">
+                    <option value="USD">US Dollar (USD)</option>
+                    <option value="EUR">Euro (EUR)</option>
+                    <option value="XMR">Monero (XMR)</option>
+                </select>
+            </div>
+            <div class="atm-counter">
+                <div class="count-number" id="atmCounter">X-SA-001</div>
+            </div>
+            <div class="atm-actions">
+                <button class="atm-confirm" onclick="confirmATM()">✅ CONFIRM</button>
+                <button class="atm-cancel" onclick="closeATM()">❌ CANCEL</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    MAIN APP
+    ============================================================ -->
+    <div class="container">
+
+        <!-- Header -->
+        <div class="header">
+            <h1>
+                Canal-Mardukh™
+                <small>Part of the Mardukh System™</small>
+            </h1>
+            <div class="subtitle">Version 0.2.0 Alpha</div>
+            <div class="status">
+                <span class="dot"></span> SYSTEM ONLINE · READY
+            </div>
+        </div>
+
+        <!-- ============================================================
+        DIAL COUNTER
+        ============================================================ -->
+        <div class="dial-section">
+            <div class="dial-counter" id="dialCounter">X-SA-<span class="highlight">000</span></div>
+            <div class="dial-label">Transaction Counter</div>
+
+            <div class="dial-stats">
+                <div class="stat">
+                    <div class="value" id="sharesDisplay">0</div>
+                    <div class="label">📦 Shares</div>
+                </div>
+                <div class="stat">
+                    <div class="value accepted" id="acceptedDisplay">0</div>
+                    <div class="label">✅ Accepted</div>
+                </div>
+                <div class="stat">
+                    <div class="value rejected" id="rejectedDisplay">0</div>
+                    <div class="label">🚫 Rejected</div>
+                </div>
+                <div class="stat">
+                    <div class="value" id="earningsDisplay" style="color:#00ff88;">0.00000000</div>
+                    <div class="label">💰 Earned (XMR)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================
+        ATM BUTTONS (SEND / RECEIVE / PAY)
+        ============================================================ -->
+        <div class="atm-group">
+            <button class="green" onclick="openATM('SEND')">💸 SEND</button>
+            <button class="blue" onclick="openATM('RECEIVE')">📥 RECEIVE</button>
+            <button class="gold" onclick="openATM('PAY NOW')">💳 PAY NOW</button>
+        </div>
+
+        <!-- ============================================================
+        RUNNING WINDOW (LIVE LOG)
+        ============================================================ -->
+        <div class="log-window" id="logWindow">
+            <div class="log-entry"><span class="time">⏳</span> <span class="info">Canal-Mardukh™ initialized.</span></div>
+            <div class="log-entry"><span class="time">⏳</span> <span class="info">Waiting for mining activity...</span></div>
+            <div class="log-entry"><span class="time">⏳</span> <span class="info">Click "START RIG" to begin.</span></div>
+        </div>
+
+        <!-- ============================================================
+        BUTTONS
+        ============================================================ -->
+        <div class="btn-group">
+            <button class="success" id="startBtn" onclick="startRig()">▶ START RIG</button>
+            <button class="danger" id="stopBtn" onclick="stopRig()" style="display:none;">⏹ STOP RIG</button>
+            <button class="primary" onclick="manualProcess()">📥 PROCESS ONE</button>
+            <button class="primary" onclick="clearLog()">🗑️ CLEAR LOG</button>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            Designed by <strong>Seliim Ahmed</strong><br>
+            Copyright © 2026 · All Rights Reserved
+        </div>
+
+    </div>
+
+    <!-- ============================================================
+    SCRIPT
+    ============================================================ -->
+    <script>
+        // ============================================================
+        // STATE
+        // ============================================================
+        let shares = 0;
+        let accepted = 0;
+        let rejected = 0;
+        let earned = 0.0;
+        let counter = 0;
+        let txCounter = 0;
+        let rigRunning = false;
+        let autoInterval = null;
+
+        const WALLET = "45ktWDeTNtUcVMXfJRKS6bbXMznMAStZFX6niJHcVy9uQk132bHJ21QTC5AKvqyx9XJN5e7mPc3vViyGnB2BM6DD1ZoAoZb";
+
+        // Sample data stream (mimics real data flow)
+        const dataStream = [
+            "BLOCK_12345", "TX_ABCDEF", "MINER_001", "HASH_7890",
+            "DATA_2025", "SYSTEM_INIT_ERR", "PING_OK", "DATA_CHUNK_A",
+            "AUTH_FAIL_RETRY", "SYS_REBOOT", "MEMPOOL_TX", "BLOCK_HEADER",
+            "TRANSACTION_001", "MERKLE_ROOT", "NONCE_123", "DIFFICULTY_456"
+        ];
+        let streamIndex = 0;
+
+        // ============================================================
+        // LOGGING
+        // ============================================================
+        function addLog(msg, type = 'info') {
+            const window = document.getElementById('logWindow');
+            const time = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            const className = type === 'accepted' ? 'accepted' :
+                type === 'rejected' ? 'rejected' :
+                type === 'submitted' ? 'submitted' :
+                type === 'deposited' ? 'deposited' : 'info';
+            entry.innerHTML =
+                `<span class="time">${time}</span> <span class="${className}">${msg}</span>`;
+            window.appendChild(entry);
+            window.scrollTop = window.scrollHeight;
+            // Keep only last 100 entries
+            while (window.children.length > 100) {
+                window.removeChild(window.firstChild);
+            }
+        }
+
+        // ============================================================
+        // UPDATE DISPLAY
+        // ============================================================
+        function updateDisplay() {
+            document.getElementById('dialCounter').innerHTML =
+                'X-SA-<span class="highlight">' + String(counter).padStart(3, '0') + '</span>';
+            document.getElementById('sharesDisplay').textContent = shares;
+            document.getElementById('acceptedDisplay').textContent = accepted;
+            document.getElementById('rejectedDisplay').textContent = rejected;
+            document.getElementById('earningsDisplay').textContent = earned.toFixed(8);
+        }
+
+        // ============================================================
+        // CORE PIPELINE: Sluice-Bench → Egg Shorter → ACHi → Submit → Accept → Save
+        // ============================================================
+        function processData(raw) {
+            if (!raw || !raw.trim()) return;
+            const data = raw.trim();
+            counter++;
+            const num = counter;
+
+            addLog(`📥 #${num}: ${data}`, 'info');
+
+            // --- SLUICE-BENCH: Pattern matching ---
+            const binary = toBinary(data);
+            const xmr = hasXMRPattern(binary);
+            const btc = hasBTCPattern(binary);
+
+            if (!xmr && !btc) {
+                rejected++;
+                addLog(`🚫 SLUICE-BENCH: No patterns found. Rejected.`, 'rejected');
+                updateDisplay();
+                return;
+            }
+
+            const crypto = xmr ? 'XMR' : 'BTC';
+            addLog(`🧹 SLUICE-BENCH: ${crypto} patterns caught.`, 'info');
+
+            // --- EGG SHORTER: Clean data ---
+            const washed = eggShorter(binary);
+            if (!washed) {
+                rejected++;
+                addLog(`🚫 EGG SHORTER: Empty after cleaning. Rejected.`, 'rejected');
+                updateDisplay();
+                return;
+            }
+            addLog(`🧹 EGG SHORTER: Cleaned (${washed.length} chars).`, 'info');
+
+            // --- SHORT → ACHi ---
+            const achicode = toACHI(washed);
+            addLog(`🔢 SHORT: ${achicode}`, 'info');
+
+            // --- SEND: Submit to pool via wallet ---
+            addLog(`📤 SEND: Submitted to pool via wallet.`, 'submitted');
+
+            // --- ACCEPT: Pool accepts ---
+            addLog(`✅ ACCEPT: Pool accepted share.`, 'accepted');
+
+            // --- SAVE: Deposit to wallet ---
+            const earn = 0.0000000001;
+            earned += earn;
+            shares++;
+            accepted++;
+            addLog(`💾 SAVE: +${earn.toFixed(10)} XMR deposited to wallet.`, 'deposited');
+            addLog(`🔄 X-SA: X-SA-${String(num).padStart(3, '0')}`, 'info');
+
+            updateDisplay();
+        }
+
+        // ============================================================
+        // HELPER FUNCTIONS (Sluice-Bench, Egg Shorter, ACHi)
+        // ============================================================
+        function hasXMRPattern(binary) {
+            const patterns = ['101', '110', '011', '1110', '1001', '0101', '0011', '1111'];
+            return patterns.some(p => binary.includes(p));
+        }
+
+        function hasBTCPattern(binary) {
+            const patterns = ['010', '001', '111', '1010', '0101', '1100', '0010', '1001', '0110'];
+            return patterns.some(p => binary.includes(p));
+        }
+
+        function toBinary(input) {
+            let bin = '';
+            for (let i = 0; i < input.length; i++) {
+                let c = input.charCodeAt(i);
+                for (let j = 7; j >= 0; j--) {
+                    bin += (c & (1 << j)) ? '1' : '0';
+                }
+            }
+            return bin;
+        }
+
+        function eggShorter(binary) {
+            let result = '';
+            for (let i = 0; i < binary.length; i += 3) {
+                if (i + 3 > binary.length) break;
+                let chunk = binary.substring(i, i + 3);
+                if (chunk !== '000' && chunk !== '111') {
+                    result += chunk;
+                }
+            }
+            return result;
+        }
+
+        function toACHI(washed) {
+            let clean = '';
+            for (let i = 0; i < washed.length && clean.length < 6; i++) {
+                if (washed[i].match(/[A-Za-z0-9]/)) clean += washed[i];
+            }
+            while (clean.length < 6) clean += '0' + (counter % 10);
+            clean = clean.substring(0, 6);
+            return 'ACHi' + clean;
+        }
+
+        // ============================================================
+        // BUTTON FUNCTIONS
+        // ============================================================
+        function startRig() {
+            if (rigRunning) return;
+            rigRunning = true;
+            document.getElementById('startBtn').style.display = 'none';
+            document.getElementById('stopBtn').style.display = 'inline-block';
+            addLog('▶️ RIG STARTED — collecting from data stream...', 'info');
+
+            autoInterval = setInterval(() => {
+                if (!rigRunning) return;
+                if (streamIndex >= dataStream.length) streamIndex = 0;
+                processData(dataStream[streamIndex++]);
+            }, 3000);
+        }
+
+        function stopRig() {
+            rigRunning = false;
+            clearInterval(autoInterval);
+            document.getElementById('startBtn').style.display = 'inline-block';
+            document.getElementById('stopBtn').style.display = 'none';
+            addLog('⏹️ RIG STOPPED.', 'info');
+        }
+
+        function manualProcess() {
+            if (streamIndex >= dataStream.length) streamIndex = 0;
+            processData(dataStream[streamIndex++]);
+        }
+
+        function clearLog() {
+            document.getElementById('logWindow').innerHTML = '';
+            addLog('🗑️ Log cleared.', 'info');
+        }
+
+        // ============================================================
+        // ATM FUNCTIONS (SEND / RECEIVE / PAY)
+        // ============================================================
+        function openATM(action) {
+            txCounter++;
+            const txId = 'X-SA-' + String(txCounter).padStart(3, '0');
+            document.getElementById('atmCounter').textContent = txId;
+            document.getElementById('atmOverlay').classList.add('active');
+            addLog(`🏦 ATM ${action} opened (${txId})`, 'info');
+        }
+
+        function closeATM() {
+            document.getElementById('atmOverlay').classList.remove('active');
+            addLog('✅ ATM closed.', 'accepted');
+        }
+
+        function confirmATM() {
+            const sender = document.getElementById('atmSender').value.trim();
+            const receiverName = document.getElementById('atmReceiverName').value.trim();
+            const receiverAccount = document.getElementById('atmReceiverAccount').value.trim();
+            const amount = document.getElementById('atmAmount').value;
+            const currency = document.getElementById('atmCurrency').value;
+
+            if (!receiverName || !receiverAccount || !amount || parseFloat(amount) <= 0) {
+                alert('❌ Please fill all fields with valid data.');
+                return;
+            }
+
+            const txId = document.getElementById('atmCounter').textContent;
+            addLog(`💳 ATM TRANSACTION: ${amount} ${currency} sent to ${receiverName} (${receiverAccount}) — ${txId}`, 'submitted');
+            addLog(`✅ ATM TRANSACTION COMPLETE: ${txId}`, 'accepted');
+
+            // Add a small simulated deposit
+            const earn = 0.0000000001;
+            earned += earn;
+            shares++;
+            accepted++;
+            counter++;
+            updateDisplay();
+
+            alert(`✅ TRANSACTION COMPLETE\n\nSender: ${sender}\nReceiver: ${receiverName}\nAccount: ${receiverAccount}\nAmount: ${amount} ${currency}\nX-SA: ${txId}`);
+
+            closeATM();
+        }
+
+        // Close ATM on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && document.getElementById('atmOverlay').classList.contains('active')) {
+                closeATM();
+            }
+        });
+
+        // ============================================================
+        // INIT
+        // ============================================================
+        addLog('🚀 Canal-Mardukh™ v0.2.0 Alpha', 'info');
+        addLog('📤 Wallet: ' + WALLET.substring(0, 20) + '...', 'info');
+        addLog('💡 Click "START RIG" to begin mining.', 'info');
+        updateDisplay();
+    </script>
+</body>
+</html>
