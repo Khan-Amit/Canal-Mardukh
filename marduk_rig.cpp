@@ -50,9 +50,6 @@ vector<string> sampleData = {
     "TRANSACTION_001", "MERKLE_ROOT", "NONCE_123", "DIFFICULTY_456"
 };
 
-// ============================================================
-// EGG SHORTER & SLUICE-BENCH
-// ============================================================
 void to_binary(const unsigned char* data, int len, char* output) {
     int idx = 0;
     for (int i = 0; i < len && idx < 4096; i++) {
@@ -92,9 +89,6 @@ int has_btc_pattern(const char* binary) {
     return 0;
 }
 
-// ============================================================
-// STRATUM CLIENT
-// ============================================================
 int connect_pool() {
     int s = socket(AF_INET, SOCK_STREAM, 0);
     if (s < 0) return -1;
@@ -135,9 +129,6 @@ int pool_accept(int s) {
     return 0;
 }
 
-// ============================================================
-// WEB SERVER
-// ============================================================
 class WebServer {
 private:
     int server_fd;
@@ -440,9 +431,6 @@ fetchRealData();
     void stop() { running = false; }
 };
 
-// ============================================================
-// PROCESS DATA
-// ============================================================
 void process_data(const char* raw, int sock) {
     char binary[4096], washed[4096];
     to_binary((const unsigned char*)raw, strlen(raw), binary);
@@ -474,9 +462,6 @@ void process_data(const char* raw, int sock) {
     }
 }
 
-// ============================================================
-// AUTO-GENERATE DATA
-// ============================================================
 void auto_generate_data(int sock) {
     int idx = 0;
     while (true) {
@@ -487,9 +472,6 @@ void auto_generate_data(int sock) {
     }
 }
 
-// ============================================================
-// MAIN
-// ============================================================
 int main() {
     cout << "\n════════════════════════════════════════════════════\n";
     cout << "⚖️ CANAL-MARDUKH™ v0.2.0 — REAL DATA\n";
