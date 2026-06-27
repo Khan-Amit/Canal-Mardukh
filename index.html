@@ -5,238 +5,65 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Canal-Mardukh™</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            background: #0a0a0a;
-            color: #e0e0e0;
-            font-family: 'Segoe UI', Arial, sans-serif;
-            min-height: 100vh;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .container {
-            max-width: 1100px;
-            width: 100%;
-            background: #111;
-            border: 2px solid #A66A00;
-            border-radius: 16px;
-            padding: 30px;
-        }
-        h1 { color: #FFD27A; font-size: 2rem; letter-spacing: 2px; }
-        h1 small { font-size: 0.7rem; color: #888; display: block; }
-        .status { font-weight: bold; font-size: 0.85rem; margin: 10px 0; }
-        .status .dot {
-            display: inline-block;
-            width: 10px; height: 10px;
-            border-radius: 50%;
-            margin-right: 8px;
-        }
-        .status.online .dot { background: #7CFC7C; animation: pulse 1.5s ease-in-out infinite; }
-        .status.offline .dot { background: #ff6b6b; }
-        @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
-
-        .wallet-display {
-            background: #0a0a0a;
-            border: 1px solid #222;
-            border-radius: 8px;
-            padding: 12px 15px;
-            margin: 15px 0;
-            word-break: break-all;
-            font-family: 'Courier New', monospace;
-            font-size: 0.75rem;
-            color: #88ffaa;
-        }
-        .wallet-display .label {
-            color: #888;
-            font-size: 0.6rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            display: block;
-            margin-bottom: 3px;
-        }
-
-        .dial-counter {
-            text-align: center;
-            padding: 15px 0 10px;
-            font-size: 3.5rem;
-            font-weight: bold;
-            color: #FFD27A;
-            font-family: 'Courier New', monospace;
-        }
-        .dial-counter .highlight { color: #00ff88; }
-
-        .dial-stats {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            background: #0a0a0a;
-            border: 1px solid #222;
-            border-radius: 8px;
-            padding: 15px;
-            margin: 15px 0;
-        }
-        @media (max-width: 500px) { .dial-stats { grid-template-columns: repeat(2, 1fr); } }
-        .dial-stat { text-align: center; }
-        .dial-stat .value {
-            font-size: 1.6rem;
-            font-weight: bold;
-            font-family: 'Courier New', monospace;
-            color: #FFD27A;
-        }
-        .dial-stat .value.accepted { color: #7CFC7C; }
-        .dial-stat .value.rejected { color: #ff6b6b; }
-        .dial-stat .value.earnings { color: #00ff88; }
-        .dial-stat .label {
-            font-size: 0.55rem;
-            color: #888;
-            text-transform: uppercase;
-        }
-
-        .pool-selector {
-            background: #0a0a0a;
-            border: 1px solid #222;
-            border-radius: 8px;
-            padding: 12px 15px;
-            margin: 15px 0;
-        }
-        .pool-selector label {
-            color: #888;
-            font-size: 0.6rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            display: block;
-            margin-bottom: 5px;
-        }
-        .pool-selector select {
-            width: 100%;
-            padding: 10px;
-            background: #111;
-            border: 1px solid #333;
-            border-radius: 6px;
-            color: #e0e0e0;
-            font-size: 0.85rem;
-            outline: none;
-            cursor: pointer;
-        }
-        .pool-selector select:focus { border-color: #A66A00; }
-
-        .log-window {
-            background: #0a0a0a;
-            border: 1px solid #1a1a1a;
-            border-radius: 8px;
-            padding: 15px;
-            min-height: 250px;
-            max-height: 400px;
-            overflow-y: auto;
-            font-family: 'Courier New', monospace;
-            font-size: 0.8rem;
-            line-height: 1.8;
-            color: #aaa;
-            margin: 15px 0;
-        }
-        .log-window::-webkit-scrollbar { width: 4px; }
-        .log-window::-webkit-scrollbar-track { background: #0a0a0a; }
-        .log-window::-webkit-scrollbar-thumb { background: #A66A00; border-radius: 4px; }
-
-        .log-entry { padding: 2px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
-        .log-entry .time { color: #555; margin-right: 10px; }
-        .log-entry .accepted { color: #7CFC7C; }
-        .log-entry .rejected { color: #ff6b6b; }
-        .log-entry .submitted { color: #FFD27A; }
-        .log-entry .deposited { color: #00ff88; }
-        .log-entry .info { color: #66ccff; }
-        .log-entry .error { color: #ff6b6b; font-weight: bold; }
-
-        .btn-group {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin: 15px 0;
-        }
-        button {
-            background: transparent;
-            color: #e0e0e0;
-            border: 1px solid #444;
-            padding: 10px 22px;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            cursor: pointer;
-            flex: 1;
-            min-width: 80px;
-        }
-        button:hover { background: rgba(166,106,0,0.15); border-color: #A66A00; }
-        button.primary { border-color: #A66A00; color: #FFD27A; }
-        button.danger { border-color: #6a2a2a; color: #ff6b6b; }
-
-        .atm-group {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin: 10px 0;
-        }
-        .atm-group button { flex: 0 1 auto; padding: 8px 20px; font-size: 0.75rem; border-color: #333; }
-        .atm-group button.gold { border-color: #A66A00; color: #FFD27A; }
-        .atm-group button.green { border-color: #2a6a3a; color: #7CFC7C; }
-        .atm-group button.blue { border-color: #1a4a6a; color: #66ccff; }
-
-        .footer {
-            text-align: center;
-            margin-top: 20px;
-            padding-top: 15px;
-            border-top: 1px solid #1a1a1a;
-            font-size: 0.7rem;
-            color: #555;
-        }
-        .footer strong { color: #FFD27A; }
-
-        /* ATM POPUP */
-        .atm-overlay {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100vw; height: 100vh;
-            background: rgba(0,0,0,0.92);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            backdrop-filter: blur(4px);
-        }
-        .atm-overlay.active { display: flex; }
-        .atm-box {
-            background: #111;
-            border: 2px solid #A66A00;
-            border-radius: 16px;
-            padding: 30px;
-            max-width: 420px;
-            width: 92%;
-        }
-        .atm-box h2 { color: #FFD27A; font-size: 1.4rem; border-bottom: 1px solid #222; padding-bottom: 12px; margin-bottom: 15px; text-align: center; }
-        .atm-field { margin-bottom: 12px; text-align: left; }
-        .atm-field label { display: block; font-size: 0.7rem; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
-        .atm-field input, .atm-field select {
-            width: 100%;
-            padding: 10px 14px;
-            background: #0a0a0a;
-            border: 1px solid #222;
-            border-radius: 6px;
-            color: #e0e0e0;
-            font-size: 0.9rem;
-            outline: none;
-        }
-        .atm-field input:focus { border-color: #A66A00; }
-        .atm-counter { background: #0a0a0a; border: 1px dashed #A66A00; border-radius: 8px; padding: 10px; text-align: center; margin: 15px 0; }
-        .atm-counter .count-number { font-family: 'Courier New', monospace; color: #FFD27A; font-size: 1.2rem; font-weight: bold; }
-        .atm-actions { display: flex; gap: 10px; margin-top: 15px; }
-        .atm-actions button { flex: 1; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.9rem; }
-        .atm-actions .atm-confirm { background: #2a6a3a; color: #fff; }
-        .atm-actions .atm-cancel { background: #3a2a2a; color: #fff; }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{background:#0a0a0a;color:#e0e0e0;font-family:'Segoe UI',Arial,sans-serif;min-height:100vh;padding:20px;display:flex;justify-content:center;align-items:center;}
+        .container{max-width:1100px;width:100%;background:#111;border:2px solid #A66A00;border-radius:16px;padding:30px;}
+        h1{color:#FFD27A;font-size:2rem;letter-spacing:2px;}
+        h1 small{font-size:0.7rem;color:#888;display:block;}
+        .status{font-weight:bold;font-size:0.85rem;}
+        .status .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px;}
+        .status.online .dot{background:#7CFC7C;animation:pulse 1.5s ease-in-out infinite;}
+        .status.offline .dot{background:#ff6b6b;}
+        @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+        .wallet-display{background:#0a0a0a;border:1px solid #222;border-radius:8px;padding:12px 15px;margin:15px 0;word-break:break-all;font-family:'Courier New',monospace;font-size:0.75rem;color:#88ffaa;}
+        .dial-counter{text-align:center;padding:15px 0 10px;font-size:3.5rem;font-weight:bold;color:#FFD27A;font-family:'Courier New',monospace;}
+        .dial-counter .highlight{color:#00ff88;}
+        .dial-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;background:#0a0a0a;border:1px solid #222;border-radius:8px;padding:15px;margin:15px 0;}
+        .dial-stat{text-align:center;}
+        .dial-stat .value{font-size:1.6rem;font-weight:bold;font-family:'Courier New',monospace;color:#FFD27A;}
+        .dial-stat .value.accepted{color:#7CFC7C;}
+        .dial-stat .value.rejected{color:#ff6b6b;}
+        .dial-stat .value.earnings{color:#00ff88;}
+        .dial-stat .label{font-size:0.55rem;color:#888;text-transform:uppercase;}
+        .pool-selector{background:#0a0a0a;border:1px solid #222;border-radius:8px;padding:12px 15px;margin:15px 0;}
+        .pool-selector select{width:100%;padding:10px;background:#111;border:1px solid #333;border-radius:6px;color:#e0e0e0;font-size:0.85rem;outline:none;cursor:pointer;}
+        .log-window{background:#0a0a0a;border:1px solid #1a1a1a;border-radius:8px;padding:15px;min-height:300px;max-height:500px;overflow-y:auto;font-family:'Courier New',monospace;font-size:0.8rem;line-height:1.8;color:#aaa;margin:15px 0;}
+        .log-entry{padding:2px 0;border-bottom:1px solid rgba(255,255,255,0.03);}
+        .log-entry .time{color:#555;margin-right:10px;}
+        .log-entry .accepted{color:#7CFC7C;}
+        .log-entry .rejected{color:#ff6b6b;}
+        .log-entry .submitted{color:#FFD27A;}
+        .log-entry .deposited{color:#00ff88;}
+        .log-entry .info{color:#66ccff;}
+        .log-entry .error{color:#ff6b6b;font-weight:bold;}
+        .btn-group{display:flex;gap:10px;flex-wrap:wrap;margin:15px 0;}
+        button{background:transparent;color:#e0e0e0;border:1px solid #444;padding:10px 22px;border-radius:6px;font-size:0.8rem;cursor:pointer;flex:1;min-width:80px;}
+        button:hover{background:rgba(166,106,0,0.15);border-color:#A66A00;}
+        button.primary{border-color:#A66A00;color:#FFD27A;}
+        button.danger{border-color:#6a2a2a;color:#ff6b6b;}
+        .atm-group{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0;}
+        .atm-group button{flex:0 1 auto;padding:8px 20px;font-size:0.75rem;border-color:#333;}
+        .atm-group button.gold{border-color:#A66A00;color:#FFD27A;}
+        .atm-group button.green{border-color:#2a6a3a;color:#7CFC7C;}
+        .atm-group button.blue{border-color:#1a4a6a;color:#66ccff;}
+        .footer{text-align:center;margin-top:20px;padding-top:15px;border-top:1px solid #1a1a1a;font-size:0.7rem;color:#555;}
+        .atm-overlay{position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.92);display:none;justify-content:center;align-items:center;z-index:9999;backdrop-filter:blur(4px);}
+        .atm-overlay.active{display:flex;}
+        .atm-box{background:#111;border:2px solid #A66A00;border-radius:16px;padding:30px;max-width:420px;width:92%;}
+        .atm-box h2{color:#FFD27A;font-size:1.4rem;border-bottom:1px solid #222;padding-bottom:12px;margin-bottom:15px;text-align:center;}
+        .atm-field{margin-bottom:12px;text-align:left;}
+        .atm-field label{display:block;font-size:0.7rem;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
+        .atm-field input,.atm-field select{width:100%;padding:10px 14px;background:#0a0a0a;border:1px solid #222;border-radius:6px;color:#e0e0e0;font-size:0.9rem;outline:none;}
+        .atm-counter{background:#0a0a0a;border:1px dashed #A66A00;border-radius:8px;padding:10px;text-align:center;margin:15px 0;}
+        .atm-counter .count-number{font-family:'Courier New',monospace;color:#FFD27A;font-size:1.2rem;font-weight:bold;}
+        .atm-actions{display:flex;gap:10px;margin-top:15px;}
+        .atm-actions button{flex:1;padding:12px;border:none;border-radius:6px;font-weight:bold;cursor:pointer;font-size:0.9rem;}
+        .atm-actions .atm-confirm{background:#2a6a3a;color:#fff;}
+        .atm-actions .atm-cancel{background:#3a2a2a;color:#fff;}
     </style>
 </head>
 <body>
 
-<!-- ATM POPUP -->
 <div class="atm-overlay" id="atmOverlay">
     <div class="atm-box">
         <h2>🌍 HUNDI TRANSFER</h2>
@@ -255,7 +82,6 @@
     </div>
 </div>
 
-<!-- MAIN -->
 <div class="container">
     <div class="header">
         <div>
@@ -266,7 +92,7 @@
     </div>
 
     <div class="wallet-display">
-        <span class="label">📬 Wallet Address</span>
+        <span style="color:#888;font-size:0.6rem;">📬 Wallet Address</span><br>
         45ktWDeTNtUcVMXfJRKS6bbXMznMAStZFX6niJHcVy9uQk132bHJ21QTC5AKvqyx9XJN5e7mPc3vViyGnB2BM6DD1ZoAoZb
     </div>
 
@@ -299,7 +125,6 @@
     <div class="log-window" id="logWindow">
         <div class="log-entry"><span class="time">⏳</span> <span class="info">Canal-Mardukh™ initialized.</span></div>
         <div class="log-entry"><span class="time">⏳</span> <span class="error">⚠️ RIG OFFLINE – Run ./marduk_rig</span></div>
-        <div class="log-entry"><span class="time">⏳</span> <span class="info">Click "FETCH REAL" to get data from the rig.</span></div>
     </div>
 
     <div class="btn-group">
@@ -307,164 +132,103 @@
         <button class="danger" onclick="clearLog()">🗑️ CLEAR LOG</button>
     </div>
 
-    <div class="footer">Designed by <strong>Seliim Ahmed</strong> · Copyright © 2026 · All Rights Reserved</div>
+    <div class="footer">Designed by <strong>Seliim Ahmed</strong> · Copyright © 2026</div>
 </div>
 
 <script>
-// ============================================================
-// NO SIMULATION – ONLY REAL DATA FROM C++ RIG
-// ============================================================
-
-const WALLET = "45ktWDeTNtUcVMXfJRKS6bbXMznMAStZFX6niJHcVy9uQk132bHJ21QTC5AKvqyx9XJN5e7mPc3vViyGnB2BM6DD1ZoAoZb";
 const RIG_URL = "/status";
+let shares=0, accepted=0, rejected=0, earned=0, counter=0, txCounter=0;
 
-let shares = 0, accepted = 0, rejected = 0, earned = 0, counter = 0;
-let txCounter = 0;
-
-// ============================================================
-// LOGGING
-// ============================================================
-function addLog(msg, type = 'info') {
-    const w = document.getElementById('logWindow');
-    const t = new Date().toLocaleTimeString();
-    const d = document.createElement('div');
-    d.className = 'log-entry';
-    const cls = type === 'accepted' ? 'accepted' :
-                type === 'rejected' ? 'rejected' :
-                type === 'submitted' ? 'submitted' :
-                type === 'deposited' ? 'deposited' :
-                type === 'error' ? 'error' : 'info';
-    d.innerHTML = `<span class="time">${t}</span> <span class="${cls}">${msg}</span>`;
-    w.appendChild(d);
-    w.scrollTop = w.scrollHeight;
-    while (w.children.length > 50) w.removeChild(w.firstChild);
+function addLog(msg,type){
+    const w=document.getElementById('logWindow');
+    const t=new Date().toLocaleTimeString();
+    const d=document.createElement('div');
+    d.className='log-entry';
+    const c=type==='accepted'?'accepted':type==='rejected'?'rejected':type==='submitted'?'submitted':type==='deposited'?'deposited':type==='error'?'error':'info';
+    d.innerHTML='<span class="time">'+t+'</span> <span class="'+c+'">'+msg+'</span>';
+    w.appendChild(d); w.scrollTop=w.scrollHeight;
+    while(w.children.length>50)w.removeChild(w.firstChild);
 }
 
-// ============================================================
-// UPDATE DISPLAY
-// ============================================================
-function updateDisplay() {
-    document.getElementById('dialCounter').textContent = String(counter).padStart(3, '0');
-    document.getElementById('sharesDisplay').textContent = shares;
-    document.getElementById('acceptedDisplay').textContent = accepted;
-    document.getElementById('rejectedDisplay').textContent = rejected;
-    document.getElementById('earningsDisplay').textContent = earned.toFixed(8);
+function updateDisplay(){
+    document.getElementById('dialCounter').textContent=String(counter).padStart(3,'0');
+    document.getElementById('sharesDisplay').textContent=shares;
+    document.getElementById('acceptedDisplay').textContent=accepted;
+    document.getElementById('rejectedDisplay').textContent=rejected;
+    document.getElementById('earningsDisplay').textContent=earned.toFixed(8);
 }
 
-// ============================================================
-// STATUS
-// ============================================================
-function setStatus(online) {
-    const bar = document.getElementById('statusBar');
-    const text = document.getElementById('statusText');
-    if (online) {
-        bar.className = 'status online';
-        text.textContent = 'ONLINE';
-    } else {
-        bar.className = 'status offline';
-        text.textContent = 'OFFLINE';
-    }
+function setStatus(online){
+    const bar=document.getElementById('statusBar');
+    const text=document.getElementById('statusText');
+    if(online){bar.className='status online';text.textContent='ONLINE';}
+    else{bar.className='status offline';text.textContent='OFFLINE';}
 }
 
-// ============================================================
-// FETCH REAL DATA – FROM C++ RIG
-// ============================================================
-async function fetchRealData() {
-    addLog('📡 Fetching real data from rig...', 'info');
-    try {
-        const res = await fetch(RIG_URL);
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const data = await res.json();
-
-        shares = data.shares || 0;
-        accepted = data.accepted || 0;
-        rejected = data.rejected || 0;
-        counter = data.counter || 0;
-        earned = data.earnings || 0;
-
-        const poolResp = data.pool_response || 'unknown';
-        if (poolResp === 'accepted') {
-            addLog(`✅ Pool: Accepted share`, 'accepted');
-        } else if (poolResp === 'rejected') {
-            addLog(`❌ Pool: Rejected share`, 'rejected');
-        }
-
-        addLog(`📊 Real data: ${shares} shares, ${earned.toFixed(8)} XMR`, 'accepted');
-        setStatus(true);
-        updateDisplay();
-
-    } catch (e) {
+async function fetchRealData(){
+    addLog('📡 Fetching real data...','info');
+    try{
+        const res=await fetch(RIG_URL);
+        if(!res.ok)throw new Error('HTTP '+res.status);
+        const data=await res.json();
+        shares=data.shares||0; accepted=data.accepted||0; rejected=data.rejected||0;
+        counter=data.counter||0; earned=data.earnings||0;
+        const poolResp=data.pool_response||'unknown';
+        if(poolResp==='accepted') addLog('✅ Pool: Accepted share','accepted');
+        else if(poolResp==='rejected') addLog('❌ Pool: Rejected share','rejected');
+        addLog('📊 Real data: '+shares+' shares, '+earned.toFixed(8)+' XMR','accepted');
+        setStatus(true); updateDisplay();
+    }catch(e){
         setStatus(false);
-        addLog(`⚠️ RIG OFFLINE: ${e.message}`, 'error');
+        addLog('⚠️ RIG OFFLINE: '+e.message,'error');
         // NO SIMULATION – only show error
     }
 }
 
-// ============================================================
-// ATM – SEND / RECEIVE / PAY
-// ============================================================
-function openATM(action) {
+function openATM(a){
     txCounter++;
-    document.getElementById('atmCounter').textContent = 'X-SA-' + String(txCounter).padStart(3, '0');
+    document.getElementById('atmCounter').textContent='X-SA-'+String(txCounter).padStart(3,'0');
     document.getElementById('atmOverlay').classList.add('active');
-    addLog(`🏦 ATM ${action} opened`, 'info');
+    addLog('🏦 ATM '+a+' opened','info');
 }
 
-function closeATM() {
+function closeATM(){
     document.getElementById('atmOverlay').classList.remove('active');
 }
 
-function confirmATM() {
-    const rec = document.getElementById('atmReceiverName').value.trim();
-    const acc = document.getElementById('atmReceiverAccount').value.trim();
-    const amt = document.getElementById('atmAmount').value;
-    const cur = document.getElementById('atmCurrency').value;
-    if (!rec || !acc || !amt || parseFloat(amt) <= 0) {
-        alert('❌ Fill all fields.');
-        return;
-    }
-    const txId = document.getElementById('atmCounter').textContent;
-    addLog(`💳 ATM: ${amt} ${cur} → ${rec} (${acc}) ${txId}`, 'submitted');
-    addLog(`✅ ATM: Transaction recorded.`, 'accepted');
-    alert(`✅ ATM COMPLETE\n${amt} ${cur} sent to ${rec}\n${txId}`);
+function confirmATM(){
+    const rec=document.getElementById('atmReceiverName').value.trim();
+    const acc=document.getElementById('atmReceiverAccount').value.trim();
+    const amt=document.getElementById('atmAmount').value;
+    const cur=document.getElementById('atmCurrency').value;
+    if(!rec||!acc||!amt||parseFloat(amt)<=0){alert('❌ Fill all fields.');return;}
+    const txId=document.getElementById('atmCounter').textContent;
+    addLog('💳 ATM: '+amt+' '+cur+' → '+rec+' ('+acc+') '+txId,'submitted');
+    addLog('✅ ATM: Transaction recorded.','accepted');
+    alert('✅ ATM COMPLETE\n'+amt+' '+cur+' sent to '+rec+'\n'+txId);
     closeATM();
 }
 
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape' && document.getElementById('atmOverlay').classList.contains('active')) {
-        closeATM();
-    }
+document.addEventListener('keydown',function(e){
+    if(e.key==='Escape' && document.getElementById('atmOverlay').classList.contains('active')) closeATM();
 });
 
-// ============================================================
-// POOL SELECTOR
-// ============================================================
-document.getElementById('poolSelect').addEventListener('change', function() {
-    const selected = this.options[this.selectedIndex].text;
-    addLog(`🌐 Pool selected: ${selected}`, 'info');
+document.getElementById('poolSelect').addEventListener('change',function(){
+    addLog('🌐 Pool selected: '+this.options[this.selectedIndex].text,'info');
 });
 
-// ============================================================
-// CLEAR LOG
-// ============================================================
-function clearLog() {
-    document.getElementById('logWindow').innerHTML = '';
-    addLog('🗑️ Log cleared.', 'info');
+function clearLog(){
+    document.getElementById('logWindow').innerHTML='';
+    addLog('🗑️ Log cleared.','info');
 }
 
-// ============================================================
-// INIT – AUTO-FETCH
-// ============================================================
-addLog('🚀 Canal-Mardukh™ v0.2.0', 'info');
-addLog(`📤 Wallet: ${WALLET.substring(0, 30)}...`, 'info');
-addLog('💡 Click "FETCH REAL" to get data from C++ rig.', 'info');
-addLog('⚠️ NO SIMULATION – only real data.', 'error');
+addLog('🚀 Canal-Mardukh™ v0.2.0','info');
+addLog('💡 Click FETCH REAL for real data.','info');
+addLog('⚠️ Run ./marduk_rig in terminal.','error');
 updateDisplay();
 setStatus(false);
-
-// Auto-fetch every 5 seconds
+setInterval(fetchRealData,3000);
 fetchRealData();
-setInterval(fetchRealData, 5000);
 </script>
 </body>
 </html>
