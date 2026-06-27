@@ -43,7 +43,6 @@ mutex earnings_mutex;
 bool last_pool_response = true;
 bool MINING = true;
 
-// Sample data for auto-generation
 vector<string> sampleData = {
     "BLOCK_12345", "TX_ABCDEF", "MINER_001", "HASH_7890",
     "DATA_2025", "SYSTEM_INIT_ERR", "PING_OK", "DATA_CHUNK_A",
@@ -515,6 +514,7 @@ int main() {
     cout << "────────────────────────────────────────────────────\n";
 
     thread auto_thread(auto_generate_data, sock);
+
     while (true) {
         this_thread::sleep_for(chrono::seconds(1));
     }
