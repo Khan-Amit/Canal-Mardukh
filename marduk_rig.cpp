@@ -1,9 +1,6 @@
+cat > marduk_rig.cpp << 'EOF'
 // ============================================================
-// MARDUK RIG — REAL DATA, NO SIMULATION
-// ============================================================
-// Compile: g++ -std=c++11 -pthread -O3 -o marduk_rig marduk_rig.cpp
-// Run: ./marduk_rig
-// Open: http://127.0.0.1:8080
+// MARDUK RIG — COMPLETE
 // ============================================================
 
 #include <iostream>
@@ -500,3 +497,6 @@ int main() {
     if (sock >= 0) close(sock);
     return 0;
 }
+EOF
+
+g++ -std=c++11 -pthread -O3 -o marduk_rig marduk_rig.cpp && ./marduk_rig
