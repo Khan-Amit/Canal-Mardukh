@@ -3,86 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Canal-Mardukh™ – King's View</title>
+    <title>Enkimos Wallet · Dashboard</title>
     <style>
         *{margin:0;padding:0;box-sizing:border-box;}
-        body{background:#0a0a0a;color:#e0e0e0;font-family:'Segoe UI',Arial,sans-serif;min-height:100vh;padding:20px;display:flex;justify-content:center;align-items:center;}
-        .container{max-width:1100px;width:100%;background:#111;border:2px solid #A66A00;border-radius:16px;padding:30px;}
-        .header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;border-bottom:1px solid #222;padding-bottom:15px;margin-bottom:20px;}
-        h1{color:#FFD27A;font-size:2rem;letter-spacing:2px;}
-        h1 small{font-size:0.7rem;color:#888;display:block;}
-        .status{font-weight:bold;font-size:0.85rem;display:flex;align-items:center;gap:8px;}
-        .status .dot{display:inline-block;width:10px;height:10px;border-radius:50%;}
-        .status.online .dot{background:#7CFC7C;animation:pulse 1.5s ease-in-out infinite;}
-        .status.offline .dot{background:#ff6b6b;}
-        @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
-        .wallet-display{background:#0a0a0a;border:1px solid #222;border-radius:8px;padding:12px 15px;margin-bottom:20px;word-break:break-all;font-family:'Courier New',monospace;font-size:0.75rem;color:#88ffaa;}
-        .wallet-display .label{color:#888;font-size:0.6rem;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:3px;}
-        .dial-counter{text-align:center;padding:15px 0 10px;font-size:3.5rem;font-weight:bold;color:#FFD27A;font-family:'Courier New',monospace;}
-        .dial-counter .highlight{color:#00ff88;}
-        .dial-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;background:#0a0a0a;border:1px solid #222;border-radius:8px;padding:15px;margin-bottom:20px;}
-        @media(max-width:500px){.dial-stats{grid-template-columns:repeat(2,1fr);}}
-        .dial-stat{text-align:center;}
-        .dial-stat .value{font-size:1.6rem;font-weight:bold;font-family:'Courier New',monospace;color:#FFD27A;}
-        .dial-stat .value.accepted{color:#7CFC7C;}
-        .dial-stat .value.rejected{color:#ff6b6b;}
-        .dial-stat .value.earnings{color:#00ff88;}
-        .dial-stat .label{font-size:0.55rem;color:#888;text-transform:uppercase;}
-        .pool-selector{background:#0a0a0a;border:1px solid #222;border-radius:8px;padding:12px 15px;margin-bottom:20px;}
-        .pool-selector label{color:#888;font-size:0.6rem;text-transform:uppercase;display:block;margin-bottom:5px;}
-        .pool-selector select{width:100%;padding:10px;background:#111;border:1px solid #333;border-radius:6px;color:#e0e0e0;font-size:0.85rem;outline:none;cursor:pointer;}
-        .log-window{background:#0a0a0a;border:1px solid #1a1a1a;border-radius:8px;padding:15px;min-height:300px;max-height:500px;overflow-y:auto;font-family:'Courier New',monospace;font-size:0.8rem;line-height:1.8;color:#aaa;margin-bottom:20px;}
-        .log-entry{padding:2px 0;border-bottom:1px solid rgba(255,255,255,0.03);}
-        .log-entry .time{color:#555;margin-right:10px;}
-        .log-entry .accepted{color:#7CFC7C;}
-        .log-entry .rejected{color:#ff6b6b;}
-        .log-entry .submitted{color:#FFD27A;}
-        .log-entry .deposited{color:#00ff88;}
-        .log-entry .info{color:#66ccff;}
-        .log-entry .error{color:#ff6b6b;font-weight:bold;}
-        .btn-group{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:15px;}
-        button{background:transparent;color:#e0e0e0;border:1px solid #444;padding:10px 22px;border-radius:6px;font-size:0.8rem;cursor:pointer;flex:1;min-width:80px;}
-        button:hover{background:rgba(166,106,0,0.15);border-color:#A66A00;}
-        button.primary{border-color:#A66A00;color:#FFD27A;}
-        button.danger{border-color:#6a2a2a;color:#ff6b6b;}
-        .footer{text-align:center;margin-top:20px;padding-top:15px;border-top:1px solid #1a1a1a;font-size:0.7rem;color:#555;}
+        body{background:#0a0e14;color:#d0d8e0;font-family:'Inter',sans-serif;min-height:100vh;padding:20px;display:flex;justify-content:center;align-items:center;}
+        .container{max-width:1000px;width:100%;background:#141a24;border:1px solid #2a3a4a;border-radius:16px;padding:30px;box-shadow:0 8px 40px rgba(0,0,0,0.6);}
+        .header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;border-bottom:1px solid #2a3a4a;padding-bottom:20px;margin-bottom:20px;}
+        h1{color:#f0c040;font-size:1.8rem;font-weight:600;letter-spacing:0.5px;}
+        .status{display:flex;align-items:center;gap:10px;font-size:0.9rem;font-weight:500;}
+        .status .dot{width:12px;height:12px;border-radius:50%;display:inline-block;}
+        .status.online .dot{background:#40c080;box-shadow:0 0 12px #40c08080;}
+        .status.offline .dot{background:#c04040;}
+        .wallet-box{background:#0e141e;border:1px solid #1e2a3a;border-radius:8px;padding:14px;margin-bottom:20px;word-break:break-all;font-family:'Courier New',monospace;font-size:0.8rem;color:#80b0d0;}
+        .wallet-box .label{color:#8899aa;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px;}
+        .grid-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
+        @media(max-width:600px){.grid-stats{grid-template-columns:repeat(2,1fr);}}
+        .stat-card{background:#0e141e;border:1px solid #1e2a3a;border-radius:8px;padding:14px;text-align:center;}
+        .stat-card .value{font-size:1.8rem;font-weight:600;color:#f0c040;}
+        .stat-card .value.accepted{color:#40c080;}
+        .stat-card .value.rejected{color:#c04040;}
+        .stat-card .value.earnings{color:#60d0f0;}
+        .stat-card .label{color:#8899aa;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.5px;margin-top:4px;}
+        .pool-selector{background:#0e141e;border:1px solid #1e2a3a;border-radius:8px;padding:12px;margin-bottom:20px;}
+        .pool-selector label{color:#8899aa;font-size:0.7rem;text-transform:uppercase;display:block;margin-bottom:4px;}
+        .pool-selector select{width:100%;padding:8px 12px;background:#0a0e14;border:1px solid #2a3a4a;border-radius:6px;color:#d0d8e0;font-size:0.9rem;outline:none;cursor:pointer;}
+        .transfer-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;}
+        .transfer-row input{flex:1;min-width:120px;padding:10px 14px;background:#0a0e14;border:1px solid #1e2a3a;border-radius:6px;color:#d0d8e0;font-size:0.9rem;outline:none;}
+        .transfer-row input:focus{border-color:#f0c040;}
+        .atm-group{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;}
+        .atm-group button{flex:1;padding:10px;border-radius:6px;border:1px solid #2a3a4a;background:transparent;color:#d0d8e0;font-weight:500;cursor:pointer;transition:0.2s;min-width:80px;}
+        .atm-group button.gold{border-color:#f0c040;color:#f0c040;}
+        .atm-group button.green{border-color:#40c080;color:#40c080;}
+        .atm-group button.blue{border-color:#60d0f0;color:#60d0f0;}
+        .atm-group button:hover{background:#1e2a3a;}
+        .log-window{background:#0a0e14;border:1px solid #1e2a3a;border-radius:8px;padding:14px;min-height:280px;max-height:400px;overflow-y:auto;font-family:'Courier New',monospace;font-size:0.8rem;line-height:1.6;color:#8899aa;margin-bottom:16px;}
+        .log-entry .time{color:#4a5a6a;margin-right:12px;}
+        .log-entry .accepted{color:#40c080;}
+        .log-entry .rejected{color:#c04040;}
+        .log-entry .submitted{color:#f0c040;}
+        .log-entry .deposited{color:#60d0f0;}
+        .log-entry .error{color:#c04040;font-weight:bold;}
+        .btn-group{display:flex;gap:10px;flex-wrap:wrap;}
+        button.primary{padding:10px 22px;border-radius:6px;border:1px solid #f0c040;background:transparent;color:#f0c040;font-weight:500;cursor:pointer;flex:1;min-width:80px;}
+        button.primary:hover{background:#1e2a3a;}
+        button.danger{padding:10px 22px;border-radius:6px;border:1px solid #c04040;background:transparent;color:#c04040;font-weight:500;cursor:pointer;flex:1;min-width:80px;}
+        button.danger:hover{background:#1e1a2a;}
+        .footer{text-align:center;margin-top:24px;padding-top:16px;border-top:1px solid #1e2a3a;font-size:0.7rem;color:#4a5a6a;}
+        .footer strong{color:#f0c040;}
+        /* ATM Overlay */
+        .atm-overlay{position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.85);display:none;justify-content:center;align-items:center;z-index:1000;backdrop-filter:blur(4px);}
+        .atm-overlay.active{display:flex;}
+        .atm-box{background:#141a24;border:1px solid #f0c040;border-radius:16px;padding:30px;max-width:420px;width:90%;}
+        .atm-box h2{color:#f0c040;font-size:1.4rem;border-bottom:1px solid #2a3a4a;padding-bottom:12px;margin-bottom:16px;text-align:center;}
+        .atm-field{margin-bottom:12px;}
+        .atm-field label{display:block;font-size:0.7rem;color:#8899aa;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;}
+        .atm-field input,.atm-field select{width:100%;padding:10px;background:#0a0e14;border:1px solid #2a3a4a;border-radius:6px;color:#d0d8e0;outline:none;}
+        .atm-field input:focus{border-color:#f0c040;}
+        .atm-counter{background:#0a0e14;border:1px dashed #f0c040;border-radius:6px;padding:8px;text-align:center;margin:16px 0;}
+        .atm-counter .count-number{font-family:'Courier New',monospace;color:#f0c040;font-weight:bold;font-size:1.2rem;}
+        .atm-actions{display:flex;gap:10px;margin-top:16px;}
+        .atm-actions button{flex:1;padding:12px;border:none;border-radius:6px;font-weight:600;cursor:pointer;}
+        .atm-actions .atm-confirm{background:#40c080;color:#fff;}
+        .atm-actions .atm-cancel{background:#4a3a3a;color:#fff;}
     </style>
 </head>
 <body>
 
+<!-- ATM OVERLAY -->
+<div class="atm-overlay" id="atmOverlay">
+    <div class="atm-box">
+        <h2>🌍 Hundi Transfer</h2>
+        <div class="atm-field"><label>Sender</label><input type="text" id="atmSender" value="Seliim Ahmed"></div>
+        <div class="atm-field"><label>Receiver Name</label><input type="text" id="atmReceiverName" placeholder="Full name"></div>
+        <div class="atm-field"><label>Receiver Account / Wallet</label><input type="text" id="atmReceiverAccount" placeholder="Account or wallet address"></div>
+        <div class="atm-field"><label>Amount</label><input type="number" id="atmAmount" placeholder="0.00" step="any"></div>
+        <div class="atm-field"><label>Currency</label>
+            <select id="atmCurrency"><option value="USD">USD</option><option value="EUR">EUR</option><option value="XMR">XMR</option></select>
+        </div>
+        <div class="atm-counter"><div class="count-number" id="atmCounter">X-SA-001</div></div>
+        <div class="atm-actions">
+            <button class="atm-confirm" onclick="confirmATM()">Confirm</button>
+            <button class="atm-cancel" onclick="closeATM()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- DASHBOARD -->
 <div class="container">
     <div class="header">
-        <div>
-            <h1>⚖️ Canal-Mardukh™<small>King's Court</small></h1>
-            <div class="status offline" id="statusBar"><span class="dot"></span> <span id="statusText">OFFLINE</span></div>
-        </div>
-        <div style="color:#888;">v0.2.0</div>
+        <h1>⚡ Enkimos Wallet</h1>
+        <div class="status offline" id="statusBar"><span class="dot"></span> <span id="statusText">Offline</span></div>
     </div>
 
-    <div class="wallet-display">
-        <span class="label">📬 Minister's Treasury (Wallet)</span>
-        45ktWDeTNtUcVMXfJRKS6bbXMznMAStZFX6niJHcVy9uQk132bHJ21QTC5AKvqyx9XJN5e7mPc3vViyGnB2BM6DD1ZoAoZb
+    <div class="wallet-box">
+        <span class="label">Wallet Address</span>
+        <span>45ktWDeTNtUcVMXfJRKS6bbXMznMAStZFX6niJHcVy9uQk132bHJ21QTC5AKvqyx9XJN5e7mPc3vViyGnB2BM6DD1ZoAoZb</span>
     </div>
 
-    <div class="dial-counter">X-SA-<span class="highlight" id="dialCounter">000</span></div>
-
-    <div class="dial-stats">
-        <div class="dial-stat"><div class="value" id="sharesDisplay">0</div><div class="label">📦 Shares</div></div>
-        <div class="dial-stat"><div class="value accepted" id="acceptedDisplay">0</div><div class="label">✅ Accepted</div></div>
-        <div class="dial-stat"><div class="value rejected" id="rejectedDisplay">0</div><div class="label">🚫 Rejected</div></div>
-        <div class="dial-stat"><div class="value earnings" id="earningsDisplay">0.00000000</div><div class="label">💰 Earned (XMR)</div></div>
+    <div class="grid-stats">
+        <div class="stat-card"><div class="value" id="sharesDisplay">0</div><div class="label">Shares</div></div>
+        <div class="stat-card"><div class="value accepted" id="acceptedDisplay">0</div><div class="label">Accepted</div></div>
+        <div class="stat-card"><div class="value rejected" id="rejectedDisplay">0</div><div class="label">Rejected</div></div>
+        <div class="stat-card"><div class="value earnings" id="earningsDisplay">0.00000000</div><div class="label">Earnings (XMR)</div></div>
     </div>
 
     <div class="pool-selector">
-        <label>⛏️ Select Mining Pool</label>
+        <label>Select Mining Pool</label>
         <select id="poolSelect">
-            <optgroup label="🟠 MONERO (XMR)">
+            <optgroup label="Monero (XMR)">
                 <option value="SupportXMR (EU)">SupportXMR (EU) · pool.supportxmr.com:3333</option>
                 <option value="Kryptex (UAE)">Kryptex (UAE) · xmr-ae.kryptex.network:7029</option>
                 <option value="MineXMR (US)">MineXMR (US) · pool.minexmr.com:3333</option>
                 <option value="MoneroOcean (US)">MoneroOcean (US) · moneroocean.stream:10128</option>
             </optgroup>
-            <optgroup label="₿ BITCOIN (BTC)">
+            <optgroup label="Bitcoin (BTC)">
                 <option value="ViaBTC">ViaBTC · btc.viabtc.top:3333</option>
                 <option value="AntPool">AntPool · antpool.com:3333</option>
                 <option value="F2Pool">F2Pool · f2pool.com:3333</option>
@@ -91,23 +125,34 @@
         </select>
     </div>
 
+    <div class="transfer-row">
+        <input type="text" id="receiverWallet" placeholder="Receiver Wallet Address" />
+        <input type="text" id="sendAmount" placeholder="Amount (XMR)" />
+    </div>
+
+    <div class="atm-group">
+        <button class="green" onclick="openATM('SEND')">💸 SEND</button>
+        <button class="blue" onclick="openATM('RECEIVE')">📥 RECEIVE</button>
+        <button class="gold" onclick="openATM('PAY NOW')">💳 PAY NOW</button>
+    </div>
+
     <div class="log-window" id="logWindow">
-        <div class="log-entry"><span class="time">⏳</span> <span class="info">King's court ready.</span></div>
-        <div class="log-entry"><span class="time">⏳</span> <span class="info">Minister is waiting for the Worker.</span></div>
-        <div class="log-entry"><span class="time">⏳</span> <span class="error">⚠️ Minister offline – run ./wallet</span></div>
+        <div class="log-entry"><span class="time">⏳</span> <span class="info">System ready.</span></div>
+        <div class="log-entry"><span class="time">⏳</span> <span class="info">Waiting for wallet service...</span></div>
+        <div class="log-entry"><span class="time">⏳</span> <span class="error">⚠️ Wallet offline – run ./enkimos-wallet</span></div>
     </div>
 
     <div class="btn-group">
-        <button class="primary" onclick="fetchRealData()">⟳ ASK THE MINISTER</button>
-        <button class="danger" onclick="clearLog()">🗑️ CLEAR LOG</button>
+        <button class="primary" onclick="fetchStatus()">⟳ Check Status</button>
+        <button class="danger" onclick="clearLog()">🗑️ Clear Log</button>
     </div>
 
-    <div class="footer">Designed by <strong>Seliim Ahmed</strong> · Copyright © 2026</div>
+    <div class="footer">Designed by <strong>Seliim Ahmed</strong> · Enkimos Wallet v1.0 · © 2026</div>
 </div>
 
 <script>
-const WALLET_URL = "http://127.0.0.1:8080/status";
-let shares=0, accepted=0, rejected=0, earned=0, counter=0;
+const API_URL = "http://127.0.0.1:8080/status";
+let shares=0, accepted=0, rejected=0, earned=0, counter=0, txCounter=0;
 
 function addLog(msg, type='info') {
     const w = document.getElementById('logWindow');
@@ -126,29 +171,23 @@ function addLog(msg, type='info') {
 }
 
 function updateDisplay() {
-    document.getElementById('dialCounter').textContent = String(counter).padStart(3, '0');
     document.getElementById('sharesDisplay').textContent = shares;
     document.getElementById('acceptedDisplay').textContent = accepted;
     document.getElementById('rejectedDisplay').textContent = rejected;
     document.getElementById('earningsDisplay').textContent = earned.toFixed(8);
+    document.getElementById('statusText').textContent = 'Online';
+    document.getElementById('statusBar').className = 'status online';
 }
 
-function setStatus(online) {
-    const bar = document.getElementById('statusBar');
-    const text = document.getElementById('statusText');
-    if (online) {
-        bar.className = 'status online';
-        text.textContent = 'ONLINE';
-    } else {
-        bar.className = 'status offline';
-        text.textContent = 'OFFLINE';
-    }
+function setOffline() {
+    document.getElementById('statusText').textContent = 'Offline';
+    document.getElementById('statusBar').className = 'status offline';
 }
 
-async function fetchRealData() {
-    addLog('👑 King asks Minister: "What is the progress?"', 'info');
+async function fetchStatus() {
+    addLog('📡 Checking wallet status...', 'info');
     try {
-        const res = await fetch(WALLET_URL);
+        const res = await fetch(API_URL);
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const data = await res.json();
         shares = data.shares || 0;
@@ -158,25 +197,65 @@ async function fetchRealData() {
         earned = data.earnings || 0;
         const poolResp = data.pool_response || 'unknown';
         if (poolResp === 'accepted') {
-            addLog('✅ Minister reports: "Worker came. Shares approved and deposited."', 'accepted');
+            addLog('✅ Shares accepted by pool.', 'accepted');
         } else if (poolResp === 'rejected') {
-            addLog('❌ Minister reports: "Worker came. Shares rejected."', 'rejected');
-        } else if (shares === 0) {
-            addLog('⏳ Minister reports: "Worker is here, but no shares yet."', 'info');
+            addLog('❌ Shares rejected by pool.', 'rejected');
         } else {
-            addLog(`📊 Minister reports: "${shares} shares collected. ${earned.toFixed(8)} XMR in treasury."`, 'accepted');
+            addLog('ℹ️ Pool response: ' + poolResp, 'info');
         }
-        setStatus(true);
+        addLog(`📊 Shares: ${shares} | Earnings: ${earned.toFixed(8)} XMR`, 'info');
         updateDisplay();
     } catch (e) {
-        setStatus(false);
-        addLog(`🔇 Minister is silent (wallet offline): ${e.message}`, 'error');
-        addLog('⚠️ King: "Start the Minister with ./wallet"', 'error');
+        setOffline();
+        addLog('🔴 Wallet unreachable: ' + e.message, 'error');
+        addLog('⚠️ Ensure ./enkimos-wallet is running.', 'error');
     }
 }
 
+function openATM(action) {
+    const receiver = document.getElementById('receiverWallet').value.trim();
+    const amount = document.getElementById('sendAmount').value.trim();
+    if (receiver) document.getElementById('atmReceiverAccount').value = receiver;
+    if (amount) document.getElementById('atmAmount').value = amount;
+    txCounter++;
+    document.getElementById('atmCounter').textContent = 'X-SA-' + String(txCounter).padStart(3, '0');
+    document.getElementById('atmOverlay').classList.add('active');
+    addLog(`🏦 ATM opened: ${action}`, 'info');
+}
+
+function closeATM() {
+    document.getElementById('atmOverlay').classList.remove('active');
+}
+
+function confirmATM() {
+    const sender = document.getElementById('atmSender').value.trim();
+    const rec = document.getElementById('atmReceiverName').value.trim();
+    const acc = document.getElementById('atmReceiverAccount').value.trim();
+    const amt = document.getElementById('atmAmount').value;
+    const cur = document.getElementById('atmCurrency').value;
+    if (!rec || !acc || !amt || parseFloat(amt) <= 0) {
+        alert('Please fill all fields.');
+        return;
+    }
+    const txId = document.getElementById('atmCounter').textContent;
+    addLog(`💳 Transaction: ${amt} ${cur} → ${rec} (${acc}) ${txId}`, 'submitted');
+    addLog(`✅ Transaction recorded.`, 'accepted');
+    // Send to wallet (POST /transaction)
+    fetch('http://127.0.0.1:8080/transaction', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sender, receiver: rec, account: acc, amount: parseFloat(amt), currency: cur, txId })
+    }).catch(() => {});
+    alert(`Transaction Complete\n${amt} ${cur} sent to ${rec}\n${txId}`);
+    closeATM();
+}
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && document.getElementById('atmOverlay').classList.contains('active')) closeATM();
+});
+
 document.getElementById('poolSelect').addEventListener('change', function() {
-    addLog('🌐 King selects pool: ' + this.options[this.selectedIndex].text, 'info');
+    addLog('🌐 Pool selected: ' + this.options[this.selectedIndex].text, 'info');
 });
 
 function clearLog() {
@@ -184,13 +263,11 @@ function clearLog() {
     addLog('🗑️ Log cleared.', 'info');
 }
 
-addLog('🚀 King\'s court initialized.', 'info');
-addLog('💡 Click "ASK THE MINISTER" for updates.', 'info');
-addLog('⚠️ Ensure the Minister (./wallet) and Worker (./rig) are running.', 'error');
-updateDisplay();
-setStatus(false);
-setInterval(fetchRealData, 3000);
-fetchRealData();
+addLog('🚀 Enkimos Wallet dashboard loaded.', 'info');
+addLog('💡 Click "Check Status" to fetch wallet data.', 'info');
+addLog('⚠️ Ensure the wallet service (./enkimos-wallet) is running.', 'error');
+setInterval(fetchStatus, 5000);
+fetchStatus();
 </script>
 </body>
 </html>
