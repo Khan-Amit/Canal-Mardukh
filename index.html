@@ -7,10 +7,10 @@
     <style>
         *{margin:0;padding:0;box-sizing:border-box;}
         body{background:#0a0a0a;color:#e0e0e0;font-family:'Segoe UI',Arial,sans-serif;min-height:100vh;padding:20px;display:flex;justify-content:center;align-items:center;}
-        .container{max-width:1100px;width:100%;background:#111;border:2px solid #A66A00;border-radius:16px;padding:30px;box-shadow:0 0 60px rgba(166,106,0,0.1);}
+        .container{max-width:1100px;width:100%;background:#111;border:2px solid #A66A00;border-radius:16px;padding:30px;}
         .header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;border-bottom:1px solid #222;padding-bottom:15px;margin-bottom:20px;}
         h1{color:#FFD27A;font-size:2rem;letter-spacing:2px;}
-        h1 small{font-size:0.7rem;color:#888;display:block;letter-spacing:1px;}
+        h1 small{font-size:0.7rem;color:#888;display:block;}
         .status{font-weight:bold;font-size:0.85rem;display:flex;align-items:center;gap:8px;}
         .status .dot{display:inline-block;width:10px;height:10px;border-radius:50%;}
         .status.online .dot{background:#7CFC7C;animation:pulse 1.5s ease-in-out infinite;}
@@ -18,8 +18,8 @@
         @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
         .wallet-display{background:#0a0a0a;border:1px solid #222;border-radius:8px;padding:12px 15px;margin-bottom:20px;word-break:break-all;font-family:'Courier New',monospace;font-size:0.75rem;color:#88ffaa;}
         .wallet-display .label{color:#888;font-size:0.6rem;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:3px;}
-        .dial-counter{text-align:center;padding:15px 0 10px;font-size:3.5rem;font-weight:bold;color:#FFD27A;font-family:'Courier New',monospace;text-shadow:0 0 30px rgba(255,210,122,0.1);}
-        .dial-counter .highlight{color:#00ff88;text-shadow:0 0 40px rgba(0,255,136,0.15);}
+        .dial-counter{text-align:center;padding:15px 0 10px;font-size:3.5rem;font-weight:bold;color:#FFD27A;font-family:'Courier New',monospace;}
+        .dial-counter .highlight{color:#00ff88;}
         .dial-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;background:#0a0a0a;border:1px solid #222;border-radius:8px;padding:15px;margin-bottom:20px;}
         @media(max-width:500px){.dial-stats{grid-template-columns:repeat(2,1fr);}}
         .dial-stat{text-align:center;}
@@ -27,25 +27,11 @@
         .dial-stat .value.accepted{color:#7CFC7C;}
         .dial-stat .value.rejected{color:#ff6b6b;}
         .dial-stat .value.earnings{color:#00ff88;}
-        .dial-stat .label{font-size:0.55rem;color:#888;text-transform:uppercase;letter-spacing:0.5px;}
+        .dial-stat .label{font-size:0.55rem;color:#888;text-transform:uppercase;}
         .pool-selector{background:#0a0a0a;border:1px solid #222;border-radius:8px;padding:12px 15px;margin-bottom:20px;}
-        .pool-selector label{color:#888;font-size:0.6rem;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:5px;}
+        .pool-selector label{color:#888;font-size:0.6rem;text-transform:uppercase;display:block;margin-bottom:5px;}
         .pool-selector select{width:100%;padding:10px;background:#111;border:1px solid #333;border-radius:6px;color:#e0e0e0;font-size:0.85rem;outline:none;cursor:pointer;}
-        .pool-selector select:focus{border-color:#A66A00;}
-        .transfer-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:15px;}
-        .transfer-row input{flex:1;min-width:120px;padding:10px 14px;background:#0a0a0a;border:1px solid #222;border-radius:6px;color:#e0e0e0;font-size:0.8rem;outline:none;}
-        .transfer-row input:focus{border-color:#A66A00;}
-        .transfer-row input::placeholder{color:#555;}
-        .atm-group{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;}
-        .atm-group button{flex:1;padding:10px 20px;font-size:0.75rem;border:1px solid #333;border-radius:6px;background:transparent;color:#e0e0e0;cursor:pointer;transition:0.2s;min-width:80px;}
-        .atm-group button.gold{border-color:#A66A00;color:#FFD27A;}
-        .atm-group button.green{border-color:#2a6a3a;color:#7CFC7C;}
-        .atm-group button.blue{border-color:#1a4a6a;color:#66ccff;}
-        .atm-group button:hover{background:rgba(166,106,0,0.15);border-color:#A66A00;}
         .log-window{background:#0a0a0a;border:1px solid #1a1a1a;border-radius:8px;padding:15px;min-height:300px;max-height:500px;overflow-y:auto;font-family:'Courier New',monospace;font-size:0.8rem;line-height:1.8;color:#aaa;margin-bottom:20px;}
-        .log-window::-webkit-scrollbar{width:4px;}
-        .log-window::-webkit-scrollbar-track{background:#0a0a0a;}
-        .log-window::-webkit-scrollbar-thumb{background:#A66A00;border-radius:4px;}
         .log-entry{padding:2px 0;border-bottom:1px solid rgba(255,255,255,0.03);}
         .log-entry .time{color:#555;margin-right:10px;}
         .log-entry .accepted{color:#7CFC7C;}
@@ -55,47 +41,14 @@
         .log-entry .info{color:#66ccff;}
         .log-entry .error{color:#ff6b6b;font-weight:bold;}
         .btn-group{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:15px;}
-        button{background:transparent;color:#e0e0e0;border:1px solid #444;padding:10px 22px;border-radius:6px;font-size:0.8rem;cursor:pointer;transition:0.3s;flex:1;min-width:80px;}
+        button{background:transparent;color:#e0e0e0;border:1px solid #444;padding:10px 22px;border-radius:6px;font-size:0.8rem;cursor:pointer;flex:1;min-width:80px;}
         button:hover{background:rgba(166,106,0,0.15);border-color:#A66A00;}
         button.primary{border-color:#A66A00;color:#FFD27A;}
         button.danger{border-color:#6a2a2a;color:#ff6b6b;}
         .footer{text-align:center;margin-top:20px;padding-top:15px;border-top:1px solid #1a1a1a;font-size:0.7rem;color:#555;}
-        .footer strong{color:#FFD27A;}
-        .atm-overlay{position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.92);display:none;justify-content:center;align-items:center;z-index:9999;backdrop-filter:blur(4px);}
-        .atm-overlay.active{display:flex;}
-        .atm-box{background:#111;border:2px solid #A66A00;border-radius:16px;padding:30px;max-width:420px;width:92%;}
-        .atm-box h2{color:#FFD27A;font-size:1.4rem;border-bottom:1px solid #222;padding-bottom:12px;margin-bottom:15px;text-align:center;}
-        .atm-field{margin-bottom:12px;text-align:left;}
-        .atm-field label{display:block;font-size:0.7rem;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
-        .atm-field input,.atm-field select{width:100%;padding:10px 14px;background:#0a0a0a;border:1px solid #222;border-radius:6px;color:#e0e0e0;font-size:0.9rem;outline:none;}
-        .atm-field input:focus{border-color:#A66A00;}
-        .atm-counter{background:#0a0a0a;border:1px dashed #A66A00;border-radius:8px;padding:10px;text-align:center;margin:15px 0;}
-        .atm-counter .count-number{font-family:'Courier New',monospace;color:#FFD27A;font-size:1.2rem;font-weight:bold;}
-        .atm-actions{display:flex;gap:10px;margin-top:15px;}
-        .atm-actions button{flex:1;padding:12px;border:none;border-radius:6px;font-weight:bold;cursor:pointer;font-size:0.9rem;}
-        .atm-actions .atm-confirm{background:#2a6a3a;color:#fff;}
-        .atm-actions .atm-cancel{background:#3a2a2a;color:#fff;}
     </style>
 </head>
 <body>
-
-<div class="atm-overlay" id="atmOverlay">
-    <div class="atm-box">
-        <h2>🌍 HUNDI TRANSFER</h2>
-        <div class="atm-field"><label>👤 Sender</label><input type="text" id="atmSender" value="Seliim Ahmed"></div>
-        <div class="atm-field"><label>📤 Receiver</label><input type="text" id="atmReceiverName" placeholder="Receiver full name"></div>
-        <div class="atm-field"><label>📬 Receiver Account</label><input type="text" id="atmReceiverAccount" placeholder="Account / Wallet"></div>
-        <div class="atm-field"><label>💰 Amount</label><input type="number" id="atmAmount" placeholder="0.00" step="any"></div>
-        <div class="atm-field"><label>💱 Currency</label>
-            <select id="atmCurrency"><option value="USD">USD</option><option value="EUR">EUR</option><option value="XMR">XMR</option></select>
-        </div>
-        <div class="atm-counter"><div class="count-number" id="atmCounter">X-SA-001</div></div>
-        <div class="atm-actions">
-            <button class="atm-confirm" onclick="confirmATM()">✅ CONFIRM</button>
-            <button class="atm-cancel" onclick="closeATM()">❌ CANCEL</button>
-        </div>
-    </div>
-</div>
 
 <div class="container">
     <div class="header">
@@ -138,21 +91,10 @@
         </select>
     </div>
 
-    <div class="transfer-row">
-        <input type="text" id="receiverWallet" placeholder="Receiver Wallet Address" />
-        <input type="text" id="sendAmount" placeholder="Amount (XMR)" />
-    </div>
-
-    <div class="atm-group">
-        <button class="green" onclick="openATM('SEND')">💸 SEND</button>
-        <button class="blue" onclick="openATM('RECEIVE')">📥 RECEIVE</button>
-        <button class="gold" onclick="openATM('PAY NOW')">💳 PAY NOW</button>
-    </div>
-
     <div class="log-window" id="logWindow">
         <div class="log-entry"><span class="time">⏳</span> <span class="info">King's court ready.</span></div>
         <div class="log-entry"><span class="time">⏳</span> <span class="info">Minister is waiting for the Worker.</span></div>
-        <div class="log-entry"><span class="time">⏳</span> <span class="error">⚠️ Wallet offline – run ./marduk</span></div>
+        <div class="log-entry"><span class="time">⏳</span> <span class="error">⚠️ Minister offline – run ./wallet</span></div>
     </div>
 
     <div class="btn-group">
@@ -164,12 +106,8 @@
 </div>
 
 <script>
-// ============================================================
-// KING'S VIEW – ONLY communicates with the Minister (Wallet)
-// ============================================================
-
 const WALLET_URL = "http://127.0.0.1:8080/status";
-let shares=0, accepted=0, rejected=0, earned=0, counter=0, txCounter=0;
+let shares=0, accepted=0, rejected=0, earned=0, counter=0;
 
 function addLog(msg, type='info') {
     const w = document.getElementById('logWindow');
@@ -208,7 +146,7 @@ function setStatus(online) {
 }
 
 async function fetchRealData() {
-    addLog('👑 King asks Minister: "What is the progress? Is the Worker here?"', 'info');
+    addLog('👑 King asks Minister: "What is the progress?"', 'info');
     try {
         const res = await fetch(WALLET_URL);
         if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -220,11 +158,11 @@ async function fetchRealData() {
         earned = data.earnings || 0;
         const poolResp = data.pool_response || 'unknown';
         if (poolResp === 'accepted') {
-            addLog('✅ Minister reports: "Worker came. Shares approved and deposited to treasury."', 'accepted');
+            addLog('✅ Minister reports: "Worker came. Shares approved and deposited."', 'accepted');
         } else if (poolResp === 'rejected') {
-            addLog('❌ Minister reports: "Worker came. Shares rejected by the pool."', 'rejected');
+            addLog('❌ Minister reports: "Worker came. Shares rejected."', 'rejected');
         } else if (shares === 0) {
-            addLog('⏳ Minister reports: "The Worker is here, but no shares have been brought yet."', 'info');
+            addLog('⏳ Minister reports: "Worker is here, but no shares yet."', 'info');
         } else {
             addLog(`📊 Minister reports: "${shares} shares collected. ${earned.toFixed(8)} XMR in treasury."`, 'accepted');
         }
@@ -233,52 +171,12 @@ async function fetchRealData() {
     } catch (e) {
         setStatus(false);
         addLog(`🔇 Minister is silent (wallet offline): ${e.message}`, 'error');
-        addLog('⚠️ King: "The Minister is not responding. Start the wallet with ./marduk"', 'error');
+        addLog('⚠️ King: "Start the Minister with ./wallet"', 'error');
     }
 }
-
-// ============================================================
-// ATM – SEND / RECEIVE / PAY
-// ============================================================
-function openATM(action) {
-    const receiver = document.getElementById('receiverWallet').value.trim();
-    const amount = document.getElementById('sendAmount').value.trim();
-    if (receiver) document.getElementById('atmReceiverAccount').value = receiver;
-    if (amount) document.getElementById('atmAmount').value = amount;
-    txCounter++;
-    document.getElementById('atmCounter').textContent = 'X-SA-' + String(txCounter).padStart(3, '0');
-    document.getElementById('atmOverlay').classList.add('active');
-    addLog(`🏦 King opens ATM: ${action}`, 'info');
-}
-
-function closeATM() {
-    document.getElementById('atmOverlay').classList.remove('active');
-}
-
-function confirmATM() {
-    const sender = document.getElementById('atmSender').value.trim();
-    const rec = document.getElementById('atmReceiverName').value.trim();
-    const acc = document.getElementById('atmReceiverAccount').value.trim();
-    const amt = document.getElementById('atmAmount').value;
-    const cur = document.getElementById('atmCurrency').value;
-    if (!rec || !acc || !amt || parseFloat(amt) <= 0) {
-        alert('❌ Fill all fields.');
-        return;
-    }
-    const txId = document.getElementById('atmCounter').textContent;
-    addLog(`💳 King orders: ${amt} ${cur} → ${rec} (${acc}) ${txId}`, 'submitted');
-    addLog(`✅ King's order recorded.`, 'accepted');
-    alert(`✅ KING'S ORDER COMPLETE\n${amt} ${cur} sent to ${rec}\n${txId}`);
-    closeATM();
-}
-
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape' && document.getElementById('atmOverlay').classList.contains('active')) closeATM();
-});
 
 document.getElementById('poolSelect').addEventListener('change', function() {
-    const selected = this.options[this.selectedIndex].text;
-    addLog(`🌐 King selects pool: ${selected}`, 'info');
+    addLog('🌐 King selects pool: ' + this.options[this.selectedIndex].text, 'info');
 });
 
 function clearLog() {
@@ -288,8 +186,7 @@ function clearLog() {
 
 addLog('🚀 King\'s court initialized.', 'info');
 addLog('💡 Click "ASK THE MINISTER" for updates.', 'info');
-addLog('💡 Use SEND / RECEIVE / PAY for transfers.', 'info');
-addLog('⚠️ Ensure the wallet is running (./marduk).', 'error');
+addLog('⚠️ Ensure the Minister (./wallet) and Worker (./rig) are running.', 'error');
 updateDisplay();
 setStatus(false);
 setInterval(fetchRealData, 3000);
