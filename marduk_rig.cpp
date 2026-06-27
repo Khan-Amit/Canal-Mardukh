@@ -27,10 +27,6 @@
 
 using namespace std;
 
-// ============================================================
-// CONFIG
-// ============================================================
-
 #define WALLET "45ktWDeTNtUcVMXfJRKS6bbXMznMAStZFX6niJHcVy9uQk132bHJ21QTC5AKvqyx9XJN5e7mPc3vViyGnB2BM6DD1ZoAoZb"
 #define POOL_HOST "pool.supportxmr.com"
 #define POOL_PORT 3333
@@ -41,7 +37,6 @@ atomic<int> XSA_COUNTER(0);
 double TOTAL_EARNINGS = 0.0;
 mutex earnings_mutex;
 bool last_pool_response = true;
-bool MINING = true;
 
 vector<string> sampleData = {
     "BLOCK_12345", "TX_ABCDEF", "MINER_001", "HASH_7890",
