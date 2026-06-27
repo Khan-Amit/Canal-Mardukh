@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Canal-Mardukh™</title>
+    <title>Canal-Mardukh™ – Real</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -34,19 +34,9 @@
             align-items: center;
             flex-wrap: wrap;
         }
-        h1 {
-            color: #FFD27A;
-            font-size: 2rem;
-            letter-spacing: 2px;
-        }
-        h1 small {
-            font-size: 0.7rem;
-            color: #888;
-            display: block;
-            letter-spacing: 1px;
-        }
+        h1 { color: #FFD27A; font-size: 2rem; letter-spacing: 2px; }
+        h1 small { font-size: 0.7rem; color: #888; display: block; letter-spacing: 1px; }
         .status {
-            color: #7CFC7C;
             font-weight: bold;
             font-size: 0.85rem;
         }
@@ -55,11 +45,11 @@
             width: 10px;
             height: 10px;
             border-radius: 50%;
-            background: #7CFC7C;
-            animation: pulse 1.5s ease-in-out infinite;
             margin-right: 8px;
         }
-        @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+        .status.online .dot { background: #7CFC7C; animation: pulse 1.5s ease-in-out infinite; }
+        .status.offline .dot { background: #ff6b6b; }
+        @keyframes pulse { 0%,100%{opacity:1;}50%{opacity:0.3;} }
 
         .wallet-display {
             background: #0a0a0a;
@@ -87,9 +77,7 @@
             gap: 20px;
             margin-bottom: 20px;
         }
-        @media (max-width: 700px) {
-            .grid-2 { grid-template-columns: 1fr; }
-        }
+        @media (max-width: 700px) { .grid-2 { grid-template-columns: 1fr; } }
 
         .pool-selector {
             background: #0a0a0a;
@@ -113,16 +101,10 @@
             border-radius: 6px;
             color: #e0e0e0;
             font-size: 0.85rem;
-            font-family: 'Segoe UI', Arial, sans-serif;
             outline: none;
             cursor: pointer;
         }
-        .pool-selector select:focus {
-            border-color: #A66A00;
-        }
-        .pool-selector select option {
-            background: #111;
-        }
+        .pool-selector select:focus { border-color: #A66A00; }
 
         .dial-stats {
             display: grid;
@@ -133,12 +115,8 @@
             border-radius: 8px;
             padding: 15px;
         }
-        @media (max-width: 500px) {
-            .dial-stats { grid-template-columns: repeat(2, 1fr); }
-        }
-        .dial-stat {
-            text-align: center;
-        }
+        @media (max-width: 500px) { .dial-stats { grid-template-columns: repeat(2, 1fr); } }
+        .dial-stat { text-align: center; }
         .dial-stat .value {
             font-size: 1.6rem;
             font-weight: bold;
@@ -164,10 +142,7 @@
             font-family: 'Courier New', monospace;
             text-shadow: 0 0 30px rgba(255, 210, 122, 0.1);
         }
-        .dial-counter .highlight {
-            color: #00ff88;
-            text-shadow: 0 0 40px rgba(0, 255, 136, 0.15);
-        }
+        .dial-counter .highlight { color: #00ff88; text-shadow: 0 0 40px rgba(0, 255, 136, 0.15); }
 
         .log-window {
             background: #0a0a0a;
@@ -195,6 +170,7 @@
         .log-entry .deposited { color: #00ff88; }
         .log-entry .info { color: #66ccff; }
         .log-entry .wallet { color: #88ffaa; }
+        .log-entry .error { color: #ff6b6b; font-weight: bold; }
 
         .btn-group {
             display: flex;
@@ -211,14 +187,10 @@
             font-size: 0.8rem;
             cursor: pointer;
             transition: all 0.3s ease;
-            font-family: 'Segoe UI', Arial, sans-serif;
             flex: 1;
             min-width: 80px;
         }
-        button:hover {
-            background: rgba(166, 106, 0, 0.15);
-            border-color: #A66A00;
-        }
+        button:hover { background: rgba(166, 106, 0, 0.15); border-color: #A66A00; }
         button.success { border-color: #2a6a3a; color: #7CFC7C; }
         button.success:hover { background: rgba(42, 106, 58, 0.2); }
         button.danger { border-color: #6a2a2a; color: #ff6b6b; }
@@ -232,12 +204,7 @@
             flex-wrap: wrap;
             margin: 10px 0;
         }
-        .atm-group button {
-            flex: 0 1 auto;
-            padding: 8px 20px;
-            font-size: 0.75rem;
-            border-color: #333;
-        }
+        .atm-group button { flex: 0 1 auto; padding: 8px 20px; font-size: 0.75rem; border-color: #333; }
         .atm-group button.gold { border-color: #A66A00; color: #FFD27A; }
         .atm-group button.green { border-color: #2a6a3a; color: #7CFC7C; }
         .atm-group button.blue { border-color: #1a4a6a; color: #66ccff; }
@@ -252,13 +219,9 @@
         }
         .footer strong { color: #FFD27A; }
 
-        /* ATM Popup */
         .atm-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
+            top: 0; left: 0; width: 100vw; height: 100vh;
             background: rgba(0,0,0,0.92);
             display: none;
             justify-content: center;
@@ -287,7 +250,6 @@
             color: #e0e0e0;
             font-size: 0.9rem;
             outline: none;
-            font-family: 'Segoe UI', Arial, sans-serif;
         }
         .atm-field input:focus { border-color: #A66A00; }
         .atm-counter { background: #0a0a0a; border: 1px dashed #A66A00; border-radius: 8px; padding: 10px; text-align: center; margin: 15px 0; }
@@ -324,25 +286,21 @@
 <!-- MAIN -->
 <div class="container">
 
-    <!-- HEADER -->
     <div class="header">
         <div>
             <h1>⚖️ Canal-Mardukh™<small>Part of the Mardukh System™</small></h1>
-            <div class="status"><span class="dot"></span> <span id="statusText">CONNECTING...</span></div>
+            <div class="status offline" id="statusBar"><span class="dot"></span> <span id="statusText">OFFLINE</span></div>
         </div>
         <div style="color:#888;font-size:0.8rem;text-align:right;">v0.2.0</div>
     </div>
 
-    <!-- WALLET -->
     <div class="wallet-display">
         <span class="label">📬 Wallet Address</span>
         45ktWDeTNtUcVMXfJRKS6bbXMznMAStZFX6niJHcVy9uQk132bHJ21QTC5AKvqyx9XJN5e7mPc3vViyGnB2BM6DD1ZoAoZb
     </div>
 
-    <!-- DIAL COUNTER -->
     <div class="dial-counter">X-SA-<span class="highlight" id="dialCounter">000</span></div>
 
-    <!-- STATS -->
     <div class="dial-stats">
         <div class="dial-stat"><div class="value" id="sharesDisplay">0</div><div class="label">📦 Shares</div></div>
         <div class="dial-stat"><div class="value accepted" id="acceptedDisplay">0</div><div class="label">✅ Accepted</div></div>
@@ -350,7 +308,6 @@
         <div class="dial-stat"><div class="value earnings" id="earningsDisplay">0.00000000</div><div class="label">💰 Earned (XMR)</div></div>
     </div>
 
-    <!-- POOL SELECTOR -->
     <div class="grid-2">
         <div class="pool-selector">
             <label>⛏️ Select Mining Pool</label>
@@ -372,31 +329,26 @@
         <div style="display:flex;align-items:center;justify-content:center;background:#0a0a0a;border:1px solid #222;border-radius:8px;padding:10px;">
             <div style="text-align:center;">
                 <div style="font-size:0.6rem;color:#888;text-transform:uppercase;letter-spacing:1px;">Pool Status</div>
-                <div style="color:#7CFC7C;font-weight:bold;font-size:1.1rem;" id="poolStatus">⏳ Selecting...</div>
+                <div style="font-weight:bold;font-size:1.1rem;color:#ff6b6b;" id="poolStatus">🔴 Offline</div>
             </div>
         </div>
     </div>
 
-    <!-- ATM BUTTONS -->
     <div class="atm-group">
         <button class="green" onclick="openATM('SEND')">💸 SEND</button>
         <button class="blue" onclick="openATM('RECEIVE')">📥 RECEIVE</button>
         <button class="gold" onclick="openATM('PAY NOW')">💳 PAY NOW</button>
     </div>
 
-    <!-- LOG WINDOW (BIGGER) -->
     <div class="log-window" id="logWindow">
         <div class="log-entry"><span class="time">⏳</span> <span class="info">Canal-Mardukh™ initialized.</span></div>
-        <div class="log-entry"><span class="time">⏳</span> <span class="info">Waiting for mining activity...</span></div>
+        <div class="log-entry"><span class="time">⏳</span> <span class="error">⚠️ RIG OFFLINE – No simulation data.</span></div>
+        <div class="log-entry"><span class="time">⏳</span> <span class="info">Run the C++ rig and click "FETCH REAL".</span></div>
     </div>
 
-    <!-- BUTTONS -->
     <div class="btn-group">
-        <button class="success" id="startBtn" onclick="startRig()">▶ START RIG</button>
-        <button class="danger" id="stopBtn" onclick="stopRig()" style="display:none;">⏹ STOP RIG</button>
-        <button class="primary" onclick="manualProcess()">📥 PROCESS ONE</button>
-        <button class="primary" onclick="clearLog()">🗑️ CLEAR LOG</button>
         <button class="primary" onclick="fetchRealData()">⟳ FETCH REAL</button>
+        <button class="danger" onclick="clearLog()">🗑️ CLEAR LOG</button>
     </div>
 
     <div class="footer">Designed by <strong>Seliim Ahmed</strong> · Copyright © 2026 · All Rights Reserved</div>
@@ -404,42 +356,32 @@
 
 <script>
 // ============================================================
-// STATE
+// NO SIMULATION – ONLY REAL DATA FROM C++ RIG
 // ============================================================
-let shares = 0, accepted = 0, rejected = 0, earned = 0, counter = 0, txCounter = 0;
-let rigRunning = false, autoInterval = null;
+
 const WALLET = "45ktWDeTNtUcVMXfJRKS6bbXMznMAStZFX6niJHcVy9uQk132bHJ21QTC5AKvqyx9XJN5e7mPc3vViyGnB2BM6DD1ZoAoZb";
+const RIG_URL = "/status";
 
-const dataStream = [
-    "BLOCK_12345", "TX_ABCDEF", "MINER_001", "HASH_7890",
-    "DATA_2025", "SYSTEM_INIT_ERR", "PING_OK", "DATA_CHUNK_A",
-    "AUTH_FAIL_RETRY", "SYS_REBOOT", "MEMPOOL_TX", "BLOCK_HEADER",
-    "TRANSACTION_001", "MERKLE_ROOT", "NONCE_123", "DIFFICULTY_456"
-];
-let streamIndex = 0;
+let shares = 0, accepted = 0, rejected = 0, earned = 0, counter = 0;
+let txCounter = 0;
 
-// ============================================================
-// LOGGING
-// ============================================================
 function addLog(msg, type = 'info') {
     const w = document.getElementById('logWindow');
     const t = new Date().toLocaleTimeString();
     const d = document.createElement('div');
     d.className = 'log-entry';
-    const className = type === 'accepted' ? 'accepted' :
-                      type === 'rejected' ? 'rejected' :
-                      type === 'submitted' ? 'submitted' :
-                      type === 'deposited' ? 'deposited' :
-                      type === 'wallet' ? 'wallet' : 'info';
-    d.innerHTML = `<span class="time">${t}</span> <span class="${className}">${msg}</span>`;
+    const cls = type === 'accepted' ? 'accepted' :
+                type === 'rejected' ? 'rejected' :
+                type === 'submitted' ? 'submitted' :
+                type === 'deposited' ? 'deposited' :
+                type === 'wallet' ? 'wallet' :
+                type === 'error' ? 'error' : 'info';
+    d.innerHTML = `<span class="time">${t}</span> <span class="${cls}">${msg}</span>`;
     w.appendChild(d);
     w.scrollTop = w.scrollHeight;
     while (w.children.length > 100) w.removeChild(w.firstChild);
 }
 
-// ============================================================
-// UPDATE DISPLAY
-// ============================================================
 function updateDisplay() {
     document.getElementById('dialCounter').textContent = String(counter).padStart(3, '0');
     document.getElementById('sharesDisplay').textContent = shares;
@@ -448,157 +390,59 @@ function updateDisplay() {
     document.getElementById('earningsDisplay').textContent = earned.toFixed(8);
 }
 
+function setStatus(online) {
+    const bar = document.getElementById('statusBar');
+    const text = document.getElementById('statusText');
+    const poolStatus = document.getElementById('poolStatus');
+    if (online) {
+        bar.className = 'status online';
+        text.textContent = 'ONLINE';
+        poolStatus.textContent = '🟢 Connected';
+        poolStatus.style.color = '#7CFC7C';
+    } else {
+        bar.className = 'status offline';
+        text.textContent = 'OFFLINE';
+        poolStatus.textContent = '🔴 Offline';
+        poolStatus.style.color = '#ff6b6b';
+    }
+}
+
 // ============================================================
-// FETCH REAL DATA FROM C++ RIG
+// FETCH REAL DATA – ONLY FROM C++ RIG, NO SIMULATION
 // ============================================================
 async function fetchRealData() {
     addLog('📡 Fetching real data from rig...', 'info');
     try {
-        const res = await fetch('/status');
+        const res = await fetch(RIG_URL);
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const data = await res.json();
+
         shares = data.shares || 0;
         accepted = data.accepted || 0;
         rejected = data.rejected || 0;
         counter = data.counter || 0;
         earned = data.earnings || 0;
-        document.getElementById('statusText').textContent = '✅ ONLINE';
-        document.getElementById('poolStatus').textContent = '🟢 Connected';
-        addLog(`✅ Real data: ${shares} shares, ${earned.toFixed(8)} XMR`, 'accepted');
+
+        const poolResp = data.pool_response || 'unknown';
+        if (poolResp === 'accepted') {
+            addLog(`✅ Pool: Accepted share`, 'accepted');
+        } else if (poolResp === 'rejected') {
+            addLog(`❌ Pool: Rejected share`, 'rejected');
+        }
+
+        addLog(`📊 Real data: ${shares} shares, ${earned.toFixed(8)} XMR`, 'accepted');
+        setStatus(true);
         updateDisplay();
+
     } catch (e) {
-        document.getElementById('statusText').textContent = '⚠️ OFFLINE (Simulation)';
-        document.getElementById('poolStatus').textContent = '🔴 Offline';
-        addLog(`⚠️ Rig offline: ${e.message}`, 'rejected');
+        setStatus(false);
+        addLog(`⚠️ RIG OFFLINE: ${e.message}`, 'error');
+        // DO NOT GENERATE SIMULATION DATA
     }
 }
 
 // ============================================================
-// CORE PIPELINE
-// ============================================================
-function processData(raw) {
-    if (!raw || !raw.trim()) return;
-    const data = raw.trim();
-    counter++;
-    const num = counter;
-
-    addLog(`📥 #${num}: ${data}`, 'info');
-
-    // Sluice-Bench
-    const binary = toBinary(data);
-    const xmr = hasXMRPattern(binary);
-    const btc = hasBTCPattern(binary);
-    if (!xmr && !btc) {
-        rejected++;
-        addLog(`🚫 SLUICE-BENCH: No patterns. Rejected.`, 'rejected');
-        updateDisplay();
-        return;
-    }
-    const crypto = xmr ? 'XMR' : 'BTC';
-    addLog(`🧹 SLUICE-BENCH: ${crypto} patterns caught.`, 'info');
-
-    // Egg Shorter
-    const washed = eggShorter(binary);
-    if (!washed) {
-        rejected++;
-        addLog(`🚫 EGG SHORTER: Empty. Rejected.`, 'rejected');
-        updateDisplay();
-        return;
-    }
-    addLog(`🧹 EGG SHORTER: Cleaned (${washed.length} chars).`, 'info');
-
-    // ACHi
-    const achicode = toACHI(washed);
-    addLog(`🔢 SHORT: ${achicode}`, 'info');
-
-    // SUBMIT via wallet
-    addLog(`📤 SUBMITTED by wallet: ${WALLET.substring(0, 20)}...`, 'submitted');
-
-    // ACCEPTED
-    accepted++;
-    shares++;
-    const earn = 0.0000000001;
-    earned += earn;
-    addLog(`✅ ACCEPTED by pool.`, 'accepted');
-
-    // RECEIVED by wallet
-    addLog(`💰 RECEIVED: +${earn.toFixed(10)} XMR to wallet.`, 'deposited');
-    addLog(`🔄 X-SA: X-SA-${String(num).padStart(3, '0')}`, 'info');
-
-    updateDisplay();
-}
-
-// ============================================================
-// HELPERS
-// ============================================================
-function hasXMRPattern(b) {
-    const p = ['101','110','011','1110','1001','0101','0011','1111'];
-    return p.some(x => b.includes(x));
-}
-function hasBTCPattern(b) {
-    const p = ['010','001','111','1010','0101','1100','0010','1001','0110'];
-    return p.some(x => b.includes(x));
-}
-function toBinary(input) {
-    let bin = '';
-    for (let i = 0; i < input.length; i++) {
-        let c = input.charCodeAt(i);
-        for (let j = 7; j >= 0; j--) bin += (c & (1 << j)) ? '1' : '0';
-    }
-    return bin;
-}
-function eggShorter(binary) {
-    let result = '';
-    for (let i = 0; i < binary.length; i += 3) {
-        if (i + 3 > binary.length) break;
-        let chunk = binary.substring(i, i + 3);
-        if (chunk !== '000' && chunk !== '111') result += chunk;
-    }
-    return result;
-}
-function toACHI(washed) {
-    let clean = '';
-    for (let i = 0; i < washed.length && clean.length < 6; i++) {
-        if (washed[i].match(/[A-Za-z0-9]/)) clean += washed[i];
-    }
-    while (clean.length < 6) clean += '0' + (counter % 10);
-    clean = clean.substring(0, 6);
-    return 'ACHi' + clean;
-}
-
-// ============================================================
-// BUTTONS
-// ============================================================
-function startRig() {
-    if (rigRunning) return;
-    rigRunning = true;
-    document.getElementById('startBtn').style.display = 'none';
-    document.getElementById('stopBtn').style.display = 'inline-block';
-    addLog('▶️ RIG STARTED', 'info');
-    autoInterval = setInterval(() => {
-        if (!rigRunning) return;
-        if (streamIndex >= dataStream.length) streamIndex = 0;
-        processData(dataStream[streamIndex++]);
-    }, 3000);
-}
-function stopRig() {
-    rigRunning = false;
-    clearInterval(autoInterval);
-    document.getElementById('startBtn').style.display = 'inline-block';
-    document.getElementById('stopBtn').style.display = 'none';
-    addLog('⏹️ RIG STOPPED', 'info');
-}
-function manualProcess() {
-    if (streamIndex >= dataStream.length) streamIndex = 0;
-    processData(dataStream[streamIndex++]);
-}
-function clearLog() {
-    document.getElementById('logWindow').innerHTML = '';
-    addLog('🗑️ Log cleared.', 'info');
-}
-
-// ============================================================
-// ATM
+// ATM – SEND / RECEIVE / PAY
 // ============================================================
 function openATM(action) {
     txCounter++;
@@ -606,23 +450,27 @@ function openATM(action) {
     document.getElementById('atmOverlay').classList.add('active');
     addLog(`🏦 ATM ${action} opened`, 'info');
 }
-function closeATM() { document.getElementById('atmOverlay').classList.remove('active'); }
+
+function closeATM() {
+    document.getElementById('atmOverlay').classList.remove('active');
+}
+
 function confirmATM() {
     const rec = document.getElementById('atmReceiverName').value.trim();
     const acc = document.getElementById('atmReceiverAccount').value.trim();
     const amt = document.getElementById('atmAmount').value;
     const cur = document.getElementById('atmCurrency').value;
-    if (!rec || !acc || !amt || parseFloat(amt) <= 0) { alert('❌ Fill all fields.'); return; }
+    if (!rec || !acc || !amt || parseFloat(amt) <= 0) {
+        alert('❌ Fill all fields.');
+        return;
+    }
     const txId = document.getElementById('atmCounter').textContent;
     addLog(`💳 ATM: ${amt} ${cur} → ${rec} (${acc}) ${txId}`, 'submitted');
-    addLog(`✅ ATM: Transaction complete.`, 'accepted');
-    // Simulate deposit
-    const earn = 0.0000000001;
-    earned += earn; shares++; accepted++; counter++;
-    updateDisplay();
+    addLog(`✅ ATM: Transaction recorded.`, 'accepted');
     alert(`✅ ATM COMPLETE\n${amt} ${cur} sent to ${rec}\n${txId}`);
     closeATM();
 }
+
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && document.getElementById('atmOverlay').classList.contains('active')) closeATM();
 });
@@ -632,22 +480,30 @@ document.addEventListener('keydown', e => {
 // ============================================================
 document.getElementById('poolSelect').addEventListener('change', function() {
     const selected = this.options[this.selectedIndex].text;
-    document.getElementById('poolStatus').textContent = '🔄 Selected: ' + selected.split('·')[0].trim();
     addLog(`🌐 Pool selected: ${selected}`, 'info');
 });
+
+// ============================================================
+// CLEAR LOG
+// ============================================================
+function clearLog() {
+    document.getElementById('logWindow').innerHTML = '';
+    addLog('🗑️ Log cleared.', 'info');
+}
 
 // ============================================================
 // INIT
 // ============================================================
 addLog('🚀 Canal-Mardukh™ v0.2.0', 'info');
 addLog(`📤 Wallet: ${WALLET.substring(0, 30)}...`, 'wallet');
-addLog('💡 Click "START RIG" to begin.', 'info');
 addLog('💡 Click "FETCH REAL" to get data from C++ rig.', 'info');
+addLog('⚠️ NO SIMULATION – only real data.', 'error');
 updateDisplay();
+setStatus(false);
 
-// Auto-fetch on load
-setTimeout(fetchRealData, 1000);
-setInterval(fetchRealData, 5000);
+// Auto-fetch every 3 seconds
+setInterval(fetchRealData, 3000);
+fetchRealData();
 </script>
 </body>
 </html>
