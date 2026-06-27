@@ -1,6 +1,9 @@
-cat > marduk_rig.cpp << 'EOF'
 // ============================================================
-// MARDUK RIG — COMPLETE
+// MARDUK RIG — REAL SHA-256 HASHING
+// ============================================================
+// Compile: g++ -std=c++11 -pthread -O3 -o marduk_rig marduk_rig.cpp -lssl -lcrypto
+// Run: ./marduk_rig
+// Open: http://127.0.0.1:8080
 // ============================================================
 
 #include <iostream>
@@ -21,6 +24,10 @@ cat > marduk_rig.cpp << 'EOF'
 #include <mutex>
 #include <cctype>
 #include <random>
+#include <iomanip>
+
+// OpenSSL for SHA-256
+#include <openssl/sha.h>
 
 using namespace std;
 
@@ -42,6 +49,22 @@ vector<string> sampleData = {
     "TRANSACTION_001", "MERKLE_ROOT", "NONCE_123", "DIFFICULTY_456"
 };
 
+// ============================================================
+// SHA-256 HASH FUNCTION
+// ============================================================
+string sha256(const string& input) {
+    unsigned char hash[SHA256_DIGEST_LENGTH];
+    SHA256((unsigned char*)input.c_str(), input.length(), hash);
+    stringstream ss;
+    for (int i = 0; i < SHA256_DIGEST_LENGTH; i++) {
+        ss << hex << setw(2) << setfill('0') << (int)hash[i];
+    }
+    return ss.str();
+}
+
+// ============================================================
+// EGG SHORTER & SLUICE-BENCH (unchanged)
+// ============================================================
 void to_binary(const unsigned char* data, int len, char* output) {
     int idx = 0;
     for (int i = 0; i < len && idx < 4096; i++) {
@@ -81,6 +104,9 @@ int has_btc_pattern(const char* binary) {
     return 0;
 }
 
+// ============================================================
+// STRATUM CLIENT (unchanged)
+// ============================================================
 int connect_pool() {
     int s = socket(AF_INET, SOCK_STREAM, 0);
     if (s < 0) return -1;
@@ -103,9 +129,9 @@ void pool_login(int s) {
     recv(s, resp, 1023, 0);
 }
 
-void pool_submit(int s, int nonce) {
+void pool_submit(int s, const string& hash, int nonce) {
     char buf[512];
-    snprintf(buf, sizeof(buf), "{\"id\":2,\"method\":\"submit\",\"params\":[\"%s\",1,\"00000000\",%d]}\n", WALLET, nonce);
+    snprintf(buf, sizeof(buf), "{\"id\":2,\"method\":\"submit\",\"params\":[\"%s\",1,\"00000000\",%d,\"%s\"]}\n", WALLET, nonce, hash.c_str());
     string msg = to_string(strlen(buf)) + "\n" + buf;
     send(s, msg.c_str(), msg.length(), 0);
 }
@@ -121,6 +147,9 @@ int pool_accept(int s) {
     return 0;
 }
 
+// ============================================================
+// WEB SERVER – EMBEDDED HTML (unchanged)
+// ============================================================
 class WebServer {
 private:
     int server_fd;
@@ -145,6 +174,7 @@ public:
             listen(server_fd, 10);
             cout << "🌐 Dashboard: http://127.0.0.1:8080\n";
 
+            // Same HTML as before (unchanged)
             string html = R"HTML(
 <!DOCTYPE html>
 <html>
@@ -286,8 +316,8 @@ button.danger:hover{background:rgba(106,42,42,0.2);}
     </div>
     <div class="log-window" id="logWindow">
         <div class="log-entry"><span class="time">⏳</span> <span class="info">Canal-Mardukh™ initialized.</span></div>
-        <div class="log-entry"><span class="time">⏳</span> <span class="error">⚠️ RIG OFFLINE – No simulation data.</span></div>
-        <div class="log-entry"><span class="time">⏳</span> <span class="info">Run the C++ rig and click "FETCH REAL".</span></div>
+        <div class="log-entry"><span class="time">⏳</span> <span class="error">⚠️ RIG OFFLINE – Run the C++ rig.</span></div>
+        <div class="log-entry"><span class="time">⏳</span> <span class="info">Click "FETCH REAL" to get data from the rig.</span></div>
     </div>
     <div class="btn-group">
         <button class="primary" onclick="fetchRealData()">⟳ FETCH REAL</button>
@@ -423,6 +453,9 @@ fetchRealData();
     void stop() { running = false; }
 };
 
+// ============================================================
+// PROCESS DATA – WITH SHA-256
+// ============================================================
 void process_data(const char* raw, int sock) {
     char binary[4096], washed[4096];
     to_binary((const unsigned char*)raw, strlen(raw), binary);
@@ -435,6 +468,11 @@ void process_data(const char* raw, int sock) {
     egg_shorter(binary, washed);
     if (strlen(washed) == 0) return;
 
+    // ============================================================
+    // SHA-256 HASH THE CLEANED DATA
+    // ============================================================
+    string hash = sha256(washed);
+
     XSA_COUNTER.fetch_add(1);
     TOTAL_SHARES.fetch_add(1);
     double earn = 0.0000000001;
@@ -444,16 +482,20 @@ void process_data(const char* raw, int sock) {
     }
 
     if (sock >= 0) {
-        pool_submit(sock, XSA_COUNTER.load());
+        pool_submit(sock, hash, XSA_COUNTER.load());
         int accepted = pool_accept(sock);
         if (accepted) {
-            cout << "✅ ACCEPTED share #" << TOTAL_SHARES.load() << "\n";
+            cout << "✅ ACCEPTED share #" << TOTAL_SHARES.load()
+                 << " | Hash: " << hash.substr(0, 16) << "...\n";
         } else {
             cout << "❌ REJECTED share #" << TOTAL_SHARES.load() << "\n";
         }
     }
 }
 
+// ============================================================
+// AUTO-GENERATE DATA
+// ============================================================
 void auto_generate_data(int sock) {
     int idx = 0;
     while (true) {
@@ -464,9 +506,12 @@ void auto_generate_data(int sock) {
     }
 }
 
+// ============================================================
+// MAIN
+// ============================================================
 int main() {
     cout << "\n════════════════════════════════════════════════════\n";
-    cout << "⚖️ CANAL-MARDUKH™ v0.2.0 — REAL DATA\n";
+    cout << "⚖️ CANAL-MARDUKH™ v0.2.0 — SHA-256 ENABLED\n";
     cout << "════════════════════════════════════════════════════\n";
     cout << "📤 Wallet: " << WALLET << "\n";
     cout << "🌊 Pool: " << POOL_HOST << ":" << POOL_PORT << "\n";
@@ -497,6 +542,3 @@ int main() {
     if (sock >= 0) close(sock);
     return 0;
 }
-EOF
-
-g++ -std=c++11 -pthread -O3 -o marduk_rig marduk_rig.cpp && ./marduk_rig
