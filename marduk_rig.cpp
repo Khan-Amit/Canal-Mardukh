@@ -1,8 +1,9 @@
 // ============================================================
-// MARDUK RIG — REAL MINING (NO HTML EMBEDDED)
+// MARDUK RIG — REAL MINING (NO HTML)
 // ============================================================
 // Compile: g++ -std=c++11 -pthread -O3 -o marduk_rig marduk_rig.cpp -lssl -lcrypto
 // Run: ./marduk_rig
+// Open: http://127.0.0.1:8080/status for JSON
 // ============================================================
 
 #include <iostream>
@@ -127,7 +128,7 @@ int pool_accept(int s) {
 }
 
 // ============================================================
-// WEB SERVER – ONLY SERVES /status JSON
+// WEB SERVER – ONLY /status JSON
 // ============================================================
 class WebServer {
     int fd; bool running;
@@ -146,7 +147,6 @@ public:
             if (bind(fd, (struct sockaddr*)&addr, sizeof(addr)) < 0) { close(fd); return; }
             listen(fd, 10);
             cout << "🌐 Status API: http://127.0.0.1:8080/status\n";
-            cout << "📄 Open index.html in your browser\n";
 
             while (running) {
                 struct sockaddr_in cli;
@@ -191,7 +191,7 @@ void process_data(const char* raw, int sock) {
     char binary[4096], washed[4096];
     to_binary((const unsigned char*)raw, strlen(raw), binary);
     if (!has_xmr_pattern(binary) && !has_btc_pattern(binary)) {
-        cout << "🚫 REJECTED (no pattern)\n";
+        cout << "🚫 REJECTED\n";
         return;
     }
     egg_shorter(binary, washed);
@@ -233,9 +233,9 @@ int main() {
     int sock = connect_pool();
     if (sock >= 0) {
         pool_login(sock);
-        cout << "✅ Connected to pool\n";
+        cout << "✅ Connected\n";
     } else {
-        cout << "⚠️ Pool offline — running offline\n";
+        cout << "⚠️ Pool offline\n";
     }
 
     WebServer web;
