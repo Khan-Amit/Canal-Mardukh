@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Canal-Mardukh™</title>
+    <title>Canal-Mardukh™ – Index</title>
     <style>
         *{margin:0;padding:0;box-sizing:border-box;}
         body{background:#0a0a0a;color:#e0e0e0;font-family:'Segoe UI',Arial,sans-serif;min-height:100vh;padding:20px;display:flex;justify-content:center;align-items:center;}
         .container{max-width:1100px;width:100%;background:#111;border:2px solid #A66A00;border-radius:16px;padding:30px;}
+        .header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;margin-bottom:15px;}
         h1{color:#FFD27A;font-size:2rem;letter-spacing:2px;}
         h1 small{font-size:0.7rem;color:#888;display:block;}
         .status{font-weight:bold;font-size:0.85rem;}
@@ -26,6 +27,7 @@
         .dial-stat .value.earnings{color:#00ff88;}
         .dial-stat .label{font-size:0.55rem;color:#888;text-transform:uppercase;}
         .pool-selector{background:#0a0a0a;border:1px solid #222;border-radius:8px;padding:12px 15px;margin:15px 0;}
+        .pool-selector label{color:#888;font-size:0.6rem;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:5px;}
         .pool-selector select{width:100%;padding:10px;background:#111;border:1px solid #333;border-radius:6px;color:#e0e0e0;font-size:0.85rem;outline:none;cursor:pointer;}
         .log-window{background:#0a0a0a;border:1px solid #1a1a1a;border-radius:8px;padding:15px;min-height:300px;max-height:500px;overflow-y:auto;font-family:'Courier New',monospace;font-size:0.8rem;line-height:1.8;color:#aaa;margin:15px 0;}
         .log-entry{padding:2px 0;border-bottom:1px solid rgba(255,255,255,0.03);}
@@ -64,6 +66,7 @@
 </head>
 <body>
 
+<!-- ATM POPUP -->
 <div class="atm-overlay" id="atmOverlay">
     <div class="atm-box">
         <h2>🌍 HUNDI TRANSFER</h2>
@@ -82,6 +85,7 @@
     </div>
 </div>
 
+<!-- MAIN -->
 <div class="container">
     <div class="header">
         <div>
@@ -105,14 +109,22 @@
         <div class="dial-stat"><div class="value earnings" id="earningsDisplay">0.00000000</div><div class="label">💰 Earned (XMR)</div></div>
     </div>
 
+    <!-- POOL SELECTOR -->
     <div class="pool-selector">
         <label>⛏️ Select Mining Pool</label>
         <select id="poolSelect">
-            <option value="SupportXMR (EU)">SupportXMR (EU) · pool.supportxmr.com:3333</option>
-            <option value="Kryptex (UAE)">Kryptex (UAE) · xmr-ae.kryptex.network:7029</option>
-            <option value="MineXMR (US)">MineXMR (US) · pool.minexmr.com:3333</option>
-            <option value="ViaBTC">ViaBTC · btc.viabtc.top:3333</option>
-            <option value="AntPool">AntPool · antpool.com:3333</option>
+            <optgroup label="🟠 MONERO (XMR)">
+                <option value="SupportXMR (EU)">SupportXMR (EU) · pool.supportxmr.com:3333</option>
+                <option value="Kryptex (UAE)">Kryptex (UAE) · xmr-ae.kryptex.network:7029</option>
+                <option value="MineXMR (US)">MineXMR (US) · pool.minexmr.com:3333</option>
+                <option value="MoneroOcean (US)">MoneroOcean (US) · moneroocean.stream:10128</option>
+            </optgroup>
+            <optgroup label="₿ BITCOIN (BTC)">
+                <option value="ViaBTC">ViaBTC · btc.viabtc.top:3333</option>
+                <option value="AntPool">AntPool · antpool.com:3333</option>
+                <option value="F2Pool">F2Pool · f2pool.com:3333</option>
+                <option value="Binance Pool">Binance Pool · poolbinance.com:3333</option>
+            </optgroup>
         </select>
     </div>
 
@@ -136,7 +148,7 @@
 </div>
 
 <script>
-const RIG_URL = "/status";
+const RIG_URL = "http://127.0.0.1:8080/status";
 let shares=0, accepted=0, rejected=0, earned=0, counter=0, txCounter=0;
 
 function addLog(msg,type){
@@ -181,7 +193,6 @@ async function fetchRealData(){
     }catch(e){
         setStatus(false);
         addLog('⚠️ RIG OFFLINE: '+e.message,'error');
-        // NO SIMULATION – only show error
     }
 }
 
@@ -214,7 +225,8 @@ document.addEventListener('keydown',function(e){
 });
 
 document.getElementById('poolSelect').addEventListener('change',function(){
-    addLog('🌐 Pool selected: '+this.options[this.selectedIndex].text,'info');
+    const selected = this.options[this.selectedIndex].text;
+    addLog('🌐 Pool selected: '+selected,'info');
 });
 
 function clearLog(){
