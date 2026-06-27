@@ -1,5 +1,5 @@
 // ============================================================
-// MARDUK RIG — REAL MINING, NO SIMULATION
+// MARDUK RIG — COMPLETE (SHA-256 + EMBEDDED HTML)
 // ============================================================
 // Compile: g++ -std=c++11 -pthread -O3 -o marduk_rig marduk_rig.cpp -lssl -lcrypto
 // Run: ./marduk_rig
@@ -47,6 +47,9 @@ vector<string> sampleData = {
     "TRANSACTION_001", "MERKLE_ROOT", "NONCE_123", "DIFFICULTY_456"
 };
 
+// ============================================================
+// SHA-256 HASH FUNCTION
+// ============================================================
 string sha256(const string& input) {
     unsigned char hash[SHA256_DIGEST_LENGTH];
     SHA256((unsigned char*)input.c_str(), input.length(), hash);
@@ -56,6 +59,9 @@ string sha256(const string& input) {
     return ss.str();
 }
 
+// ============================================================
+// EGG SHORTER & SLUICE-BENCH
+// ============================================================
 void to_binary(const unsigned char* data, int len, char* output) {
     int idx = 0;
     for (int i = 0; i < len && idx < 4096; i++) {
@@ -90,6 +96,9 @@ int has_btc_pattern(const char* binary) {
     return 0;
 }
 
+// ============================================================
+// STRATUM CLIENT
+// ============================================================
 int connect_pool() {
     int s = socket(AF_INET, SOCK_STREAM, 0);
     if (s < 0) return -1;
@@ -127,6 +136,9 @@ int pool_accept(int s) {
     return 0;
 }
 
+// ============================================================
+// WEB SERVER WITH EMBEDDED HTML
+// ============================================================
 class WebServer {
     int fd; bool running;
 public:
@@ -145,17 +157,19 @@ public:
             listen(fd, 10);
             cout << "🌐 Dashboard: http://127.0.0.1:8080\n";
 
-            // Embedded HTML – NO SIMULATION, only real data fetch
             string html = R"HTML(
 <!DOCTYPE html>
 <html>
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Canal-Mardukh™</title>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Canal-Mardukh™</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:#0a0a0a;color:#e0e0e0;font-family:'Segoe UI',Arial,sans-serif;min-height:100vh;padding:20px;display:flex;justify-content:center;align-items:center;}
 .container{max-width:1100px;width:100%;background:#111;border:2px solid #A66A00;border-radius:16px;padding:30px;}
 h1{color:#FFD27A;font-size:2rem;letter-spacing:2px;}
-h1 small{font-size:0.7rem;color:#888;}
+h1 small{font-size:0.7rem;color:#888;display:block;}
 .status{font-weight:bold;font-size:0.85rem;}
 .status .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px;}
 .status.online .dot{background:#7CFC7C;animation:pulse 1.5s ease-in-out infinite;}
@@ -209,25 +223,66 @@ button.danger{border-color:#6a2a2a;color:#ff6b6b;}
 </style>
 </head>
 <body>
-<div class="atm-overlay" id="atmOverlay"><div class="atm-box"><h2>🌍 HUNDI TRANSFER</h2>
-<div class="atm-field"><label>👤 Sender</label><input type="text" id="atmSender" value="Seliim Ahmed"></div>
-<div class="atm-field"><label>📤 Receiver</label><input type="text" id="atmReceiverName" placeholder="Receiver full name"></div>
-<div class="atm-field"><label>📬 Receiver Account</label><input type="text" id="atmReceiverAccount" placeholder="Account / Wallet"></div>
-<div class="atm-field"><label>💰 Amount</label><input type="number" id="atmAmount" placeholder="0.00" step="any"></div>
-<div class="atm-field"><label>💱 Currency</label><select id="atmCurrency"><option value="USD">USD</option><option value="EUR">EUR</option><option value="XMR">XMR</option></select></div>
-<div class="atm-counter"><div class="count-number" id="atmCounter">X-SA-001</div></div>
-<div class="atm-actions"><button class="atm-confirm" onclick="confirmATM()">✅ CONFIRM</button><button class="atm-cancel" onclick="closeATM()">❌ CANCEL</button></div>
-</div></div>
+<div class="atm-overlay" id="atmOverlay">
+    <div class="atm-box">
+        <h2>🌍 HUNDI TRANSFER</h2>
+        <div class="atm-field"><label>👤 Sender</label><input type="text" id="atmSender" value="Seliim Ahmed"></div>
+        <div class="atm-field"><label>📤 Receiver</label><input type="text" id="atmReceiverName" placeholder="Receiver full name"></div>
+        <div class="atm-field"><label>📬 Receiver Account</label><input type="text" id="atmReceiverAccount" placeholder="Account / Wallet"></div>
+        <div class="atm-field"><label>💰 Amount</label><input type="number" id="atmAmount" placeholder="0.00" step="any"></div>
+        <div class="atm-field"><label>💱 Currency</label>
+            <select id="atmCurrency"><option value="USD">USD</option><option value="EUR">EUR</option><option value="XMR">XMR</option></select>
+        </div>
+        <div class="atm-counter"><div class="count-number" id="atmCounter">X-SA-001</div></div>
+        <div class="atm-actions">
+            <button class="atm-confirm" onclick="confirmATM()">✅ CONFIRM</button>
+            <button class="atm-cancel" onclick="closeATM()">❌ CANCEL</button>
+        </div>
+    </div>
+</div>
 <div class="container">
-<div class="header"><div><h1>⚖️ Canal-Mardukh™<small>Part of the Mardukh System™</small></h1><div class="status offline" id="statusBar"><span class="dot"></span> <span id="statusText">OFFLINE</span></div></div><div style="color:#888;">v0.2.0</div></div>
-<div class="wallet-display"><span style="color:#888;font-size:0.6rem;">📬 Wallet Address</span><br>45ktWDeTNtUcVMXfJRKS6bbXMznMAStZFX6niJHcVy9uQk132bHJ21QTC5AKvqyx9XJN5e7mPc3vViyGnB2BM6DD1ZoAoZb</div>
-<div class="dial-counter">X-SA-<span class="highlight" id="dialCounter">000</span></div>
-<div class="dial-stats"><div class="dial-stat"><div class="value" id="sharesDisplay">0</div><div class="label">📦 Shares</div></div><div class="dial-stat"><div class="value accepted" id="acceptedDisplay">0</div><div class="label">✅ Accepted</div></div><div class="dial-stat"><div class="value rejected" id="rejectedDisplay">0</div><div class="label">🚫 Rejected</div></div><div class="dial-stat"><div class="value earnings" id="earningsDisplay">0.00000000</div><div class="label">💰 Earned (XMR)</div></div></div>
-<div class="pool-selector"><label>⛏️ Select Mining Pool</label><select id="poolSelect"><option value="SupportXMR (EU)">SupportXMR (EU) · pool.supportxmr.com:3333</option><option value="Kryptex (UAE)">Kryptex (UAE) · xmr-ae.kryptex.network:7029</option><option value="MineXMR (US)">MineXMR (US) · pool.minexmr.com:3333</option><option value="ViaBTC">ViaBTC · btc.viabtc.top:3333</option><option value="AntPool">AntPool · antpool.com:3333</option></select></div>
-<div class="atm-group"><button class="green" onclick="openATM('SEND')">💸 SEND</button><button class="blue" onclick="openATM('RECEIVE')">📥 RECEIVE</button><button class="gold" onclick="openATM('PAY NOW')">💳 PAY NOW</button></div>
-<div class="log-window" id="logWindow"><div class="log-entry"><span class="time">⏳</span> <span class="info">Canal-Mardukh™ initialized.</span></div><div class="log-entry"><span class="time">⏳</span> <span class="error">⚠️ RIG OFFLINE – Run ./marduk_rig</span></div></div>
-<div class="btn-group"><button class="primary" onclick="fetchRealData()">⟳ FETCH REAL</button><button class="danger" onclick="clearLog()">🗑️ CLEAR LOG</button></div>
-<div class="footer">Designed by <strong>Seliim Ahmed</strong> · Copyright © 2026</div>
+    <div class="header">
+        <div>
+            <h1>⚖️ Canal-Mardukh™<small>Part of the Mardukh System™</small></h1>
+            <div class="status offline" id="statusBar"><span class="dot"></span> <span id="statusText">OFFLINE</span></div>
+        </div>
+        <div style="color:#888;">v0.2.0</div>
+    </div>
+    <div class="wallet-display">
+        <span style="color:#888;font-size:0.6rem;">📬 Wallet Address</span><br>
+        45ktWDeTNtUcVMXfJRKS6bbXMznMAStZFX6niJHcVy9uQk132bHJ21QTC5AKvqyx9XJN5e7mPc3vViyGnB2BM6DD1ZoAoZb
+    </div>
+    <div class="dial-counter">X-SA-<span class="highlight" id="dialCounter">000</span></div>
+    <div class="dial-stats">
+        <div class="dial-stat"><div class="value" id="sharesDisplay">0</div><div class="label">📦 Shares</div></div>
+        <div class="dial-stat"><div class="value accepted" id="acceptedDisplay">0</div><div class="label">✅ Accepted</div></div>
+        <div class="dial-stat"><div class="value rejected" id="rejectedDisplay">0</div><div class="label">🚫 Rejected</div></div>
+        <div class="dial-stat"><div class="value earnings" id="earningsDisplay">0.00000000</div><div class="label">💰 Earned (XMR)</div></div>
+    </div>
+    <div class="pool-selector">
+        <label>⛏️ Select Mining Pool</label>
+        <select id="poolSelect">
+            <option value="SupportXMR (EU)">SupportXMR (EU) · pool.supportxmr.com:3333</option>
+            <option value="Kryptex (UAE)">Kryptex (UAE) · xmr-ae.kryptex.network:7029</option>
+            <option value="MineXMR (US)">MineXMR (US) · pool.minexmr.com:3333</option>
+            <option value="ViaBTC">ViaBTC · btc.viabtc.top:3333</option>
+            <option value="AntPool">AntPool · antpool.com:3333</option>
+        </select>
+    </div>
+    <div class="atm-group">
+        <button class="green" onclick="openATM('SEND')">💸 SEND</button>
+        <button class="blue" onclick="openATM('RECEIVE')">📥 RECEIVE</button>
+        <button class="gold" onclick="openATM('PAY NOW')">💳 PAY NOW</button>
+    </div>
+    <div class="log-window" id="logWindow">
+        <div class="log-entry"><span class="time">⏳</span> <span class="info">Canal-Mardukh™ initialized.</span></div>
+        <div class="log-entry"><span class="time">⏳</span> <span class="error">⚠️ RIG OFFLINE – Run ./marduk_rig</span></div>
+    </div>
+    <div class="btn-group">
+        <button class="primary" onclick="fetchRealData()">⟳ FETCH REAL</button>
+        <button class="danger" onclick="clearLog()">🗑️ CLEAR LOG</button>
+    </div>
+    <div class="footer">Designed by <strong>Seliim Ahmed</strong> · Copyright © 2026</div>
 </div>
 <script>
 const RIG_URL = "/status";
@@ -243,6 +298,7 @@ function addLog(msg,type){
     w.appendChild(d); w.scrollTop=w.scrollHeight;
     while(w.children.length>50)w.removeChild(w.firstChild);
 }
+
 function updateDisplay(){
     document.getElementById('dialCounter').textContent=String(counter).padStart(3,'0');
     document.getElementById('sharesDisplay').textContent=shares;
@@ -250,12 +306,14 @@ function updateDisplay(){
     document.getElementById('rejectedDisplay').textContent=rejected;
     document.getElementById('earningsDisplay').textContent=earned.toFixed(8);
 }
+
 function setStatus(online){
     const bar=document.getElementById('statusBar');
     const text=document.getElementById('statusText');
     if(online){bar.className='status online';text.textContent='ONLINE';}
     else{bar.className='status offline';text.textContent='OFFLINE';}
 }
+
 async function fetchRealData(){
     addLog('📡 Fetching real data...','info');
     try{
@@ -272,11 +330,20 @@ async function fetchRealData(){
     }catch(e){
         setStatus(false);
         addLog('⚠️ RIG OFFLINE: '+e.message,'error');
-        // NO SIMULATION – just show offline.
     }
 }
-function openATM(a){txCounter++;document.getElementById('atmCounter').textContent='X-SA-'+String(txCounter).padStart(3,'0');document.getElementById('atmOverlay').classList.add('active');addLog('🏦 ATM '+a+' opened','info');}
-function closeATM(){document.getElementById('atmOverlay').classList.remove('active');}
+
+function openATM(a){
+    txCounter++;
+    document.getElementById('atmCounter').textContent='X-SA-'+String(txCounter).padStart(3,'0');
+    document.getElementById('atmOverlay').classList.add('active');
+    addLog('🏦 ATM '+a+' opened','info');
+}
+
+function closeATM(){
+    document.getElementById('atmOverlay').classList.remove('active');
+}
+
 function confirmATM(){
     const rec=document.getElementById('atmReceiverName').value.trim();
     const acc=document.getElementById('atmReceiverAccount').value.trim();
@@ -289,14 +356,27 @@ function confirmATM(){
     alert('✅ ATM COMPLETE\n'+amt+' '+cur+' sent to '+rec+'\n'+txId);
     closeATM();
 }
-document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.getElementById('atmOverlay').classList.contains('active'))closeATM();});
-document.getElementById('poolSelect').addEventListener('change',function(){addLog('🌐 Pool selected: '+this.options[this.selectedIndex].text,'info');});
-function clearLog(){document.getElementById('logWindow').innerHTML='';addLog('🗑️ Log cleared.','info');}
+
+document.addEventListener('keydown',function(e){
+    if(e.key==='Escape' && document.getElementById('atmOverlay').classList.contains('active')) closeATM();
+});
+
+document.getElementById('poolSelect').addEventListener('change',function(){
+    addLog('🌐 Pool selected: '+this.options[this.selectedIndex].text,'info');
+});
+
+function clearLog(){
+    document.getElementById('logWindow').innerHTML='';
+    addLog('🗑️ Log cleared.','info');
+}
+
 addLog('🚀 Canal-Mardukh™ v0.2.0','info');
 addLog('💡 Click FETCH REAL for real data.','info');
 addLog('⚠️ Run ./marduk_rig in terminal.','error');
-updateDisplay(); setStatus(false);
-setInterval(fetchRealData,3000); fetchRealData();
+updateDisplay();
+setStatus(false);
+setInterval(fetchRealData,3000);
+fetchRealData();
 </script>
 </body>
 </html>
@@ -341,20 +421,34 @@ setInterval(fetchRealData,3000); fetchRealData();
     void stop() { running = false; }
 };
 
+// ============================================================
+// PROCESS DATA
+// ============================================================
 void process_data(const char* raw, int sock) {
     char binary[4096], washed[4096];
     to_binary((const unsigned char*)raw, strlen(raw), binary);
-    if (!has_xmr_pattern(binary) && !has_btc_pattern(binary)) { cout << "🚫 REJECTED\n"; return; }
+    if (!has_xmr_pattern(binary) && !has_btc_pattern(binary)) {
+        cout << "🚫 REJECTED (no pattern)\n";
+        return;
+    }
     egg_shorter(binary, washed);
-    if (!strlen(washed)) return;
+    if (strlen(washed) == 0) return;
+
     string hash = sha256(washed);
     XSA_COUNTER.fetch_add(1);
     TOTAL_SHARES.fetch_add(1);
     double earn = 0.0000000001;
     { lock_guard<mutex> lock(earnings_mutex); TOTAL_EARNINGS += earn; }
+
     if (sock >= 0) {
         pool_submit(sock, hash, XSA_COUNTER.load());
-        cout << (pool_accept(sock) ? "✅ ACCEPTED #" : "❌ REJECTED #") << TOTAL_SHARES.load() << "\n";
+        int accepted = pool_accept(sock);
+        if (accepted) {
+            cout << "✅ ACCEPTED #" << TOTAL_SHARES.load()
+                 << " | Hash: " << hash.substr(0, 16) << "...\n";
+        } else {
+            cout << "❌ REJECTED #" << TOTAL_SHARES.load() << "\n";
+        }
     }
 }
 
@@ -367,24 +461,28 @@ void auto_generate(int sock) {
 
 int main() {
     cout << "\n════════════════════════════════════════════════════\n";
-    cout << "⚖️ CANAL-MARDUKH™ — REAL MINING\n";
+    cout << "⚖️ CANAL-MARDUKH™ — COMPLETE\n";
     cout << "════════════════════════════════════════════════════\n";
     cout << "📤 Wallet: " << WALLET << "\n";
     cout << "🌊 Pool: " << POOL_HOST << ":" << POOL_PORT << "\n";
     cout << "────────────────────────────────────────────────────\n";
 
     int sock = connect_pool();
-    if (sock >= 0) { pool_login(sock); cout << "✅ Connected\n"; }
-    else cout << "⚠️ Pool offline\n";
+    if (sock >= 0) {
+        pool_login(sock);
+        cout << "✅ Connected to pool\n";
+    } else {
+        cout << "⚠️ Pool offline — running offline\n";
+    }
 
     WebServer web;
     web.start();
+
     cout << "────────────────────────────────────────────────────\n";
-    cout << "⛏️ Mining...\n";
+    cout << "⛏️ Auto-generating data every 2 seconds...\n";
     cout << "────────────────────────────────────────────────────\n";
 
-    thread(auto_generate, sock);
-
+    thread auto_thread(auto_generate, sock);
     while (true) this_thread::sleep_for(chrono::seconds(1));
 
     web.stop();
