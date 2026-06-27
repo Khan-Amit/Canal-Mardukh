@@ -1,309 +1,83 @@
-// ============================================================
-// MARDUK — COMPLETE SYSTEM (Rig + Wallet + Index)
-// ============================================================
-// Compile: g++ -std=c++11 -pthread -O3 -o marduk marduk.cpp -lssl -lcrypto
-// Run: ./marduk
-// Then open http://127.0.0.1:8080
-// ============================================================
-
-#include <iostream>
-#include <string>
-#include <vector>
-#include <algorithm>
-#include <chrono>
-#include <thread>
-#include <fstream>
-#include <sstream>
-#include <cstring>
-#include <netdb.h>
-#include <arpa/inet.h>
-#include <unistd.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <atomic>
-#include <mutex>
-#include <cctype>
-#include <random>
-#include <iomanip>
-#include <openssl/sha.h>
-
-using namespace std;
-
-// ============================================================
-// CONFIG
-// ============================================================
-
-#define WALLET "45ktWDeTNtUcVMXfJRKS6bbXMznMAStZFX6niJHcVy9uQk132bHJ21QTC5AKvqyx9XJN5e7mPc3vViyGnB2BM6DD1ZoAoZb"
-#define POOL_HOST "pool.supportxmr.com"
-#define POOL_PORT 3333
-#define PASS "x"
-
-// ============================================================
-// GLOBALS
-// ============================================================
-
-atomic<int> TOTAL_SHARES(0);
-atomic<int> XSA_COUNTER(0);
-double TOTAL_EARNINGS = 0.0;
-mutex earnings_mutex;
-bool last_pool_response = true;
-bool MINING = true;
-
-// ============================================================
-// SLUICE-BENCH REFERENCE DATABASE (HS256 Patterns)
-// ============================================================
-
-const char* xmr_patterns[] = {"101","110","011","1110","1001","0101","0011","1111"};
-const char* btc_patterns[] = {"010","001","111","1010","0101","1100","0010","1001","0110"};
-
-// ============================================================
-// SHA-256 HASH FUNCTION (HS256)
-// ============================================================
-
-string sha256(const string& input) {
-    unsigned char hash[SHA256_DIGEST_LENGTH];
-    SHA256((unsigned char*)input.c_str(), input.length(), hash);
-    stringstream ss;
-    for (int i = 0; i < SHA256_DIGEST_LENGTH; i++)
-        ss << hex << setw(2) << setfill('0') << (int)hash[i];
-    return ss.str();
-}
-
-// ============================================================
-// EGG SHORTER
-// ============================================================
-
-string toBinary(const string& input) {
-    string binary;
-    for (unsigned char c : input) {
-        for (int j = 7; j >= 0; j--)
-            binary += (c & (1 << j)) ? '1' : '0';
-    }
-    return binary;
-}
-
-string eggShorter(const string& binary) {
-    string result;
-    for (int i = 0; i < (int)binary.length() && i + 3 <= (int)binary.length(); i += 3) {
-        string chunk = binary.substr(i, 3);
-        if (chunk != "000" && chunk != "111")
-            result += chunk;
-    }
-    return result;
-}
-
-// ============================================================
-// SLUICE-BENCH – Pattern Matching
-// ============================================================
-
-bool hasXMRPattern(const string& binary) {
-    for (int i = 0; i < 8; i++) {
-        if (binary.find(xmr_patterns[i]) != string::npos) return true;
-    }
-    return false;
-}
-
-bool hasBTCPattern(const string& binary) {
-    for (int i = 0; i < 9; i++) {
-        if (binary.find(btc_patterns[i]) != string::npos) return true;
-    }
-    return false;
-}
-
-// ============================================================
-// STRATUM CLIENT (Wallet – sends to pool and waits for approval)
-// ============================================================
-
-int connectPool() {
-    int s = socket(AF_INET, SOCK_STREAM, 0);
-    if (s < 0) return -1;
-    struct hostent* server = gethostbyname(POOL_HOST);
-    if (!server) { close(s); return -1; }
-    struct sockaddr_in addr;
-    addr.sin_family = AF_INET;
-    memcpy(&addr.sin_addr.s_addr, server->h_addr, server->h_length);
-    addr.sin_port = htons(POOL_PORT);
-    if (connect(s, (struct sockaddr*)&addr, sizeof(addr)) < 0) { close(s); return -1; }
-    return s;
-}
-
-void poolLogin(int s) {
-    char buf[512];
-    snprintf(buf, sizeof(buf), "{\"id\":1,\"method\":\"login\",\"params\":{\"login\":\"%s\",\"pass\":\"%s\"}}\n", WALLET, PASS);
-    string msg = to_string(strlen(buf)) + "\n" + buf;
-    send(s, msg.c_str(), msg.length(), 0);
-    char resp[1024];
-    recv(s, resp, 1023, 0);
-}
-
-void poolSubmit(int s, const string& hash, int nonce) {
-    char buf[512];
-    snprintf(buf, sizeof(buf), "{\"id\":2,\"method\":\"submit\",\"params\":[\"%s\",1,\"00000000\",%d,\"%s\"]}\n", WALLET, nonce, hash.c_str());
-    string msg = to_string(strlen(buf)) + "\n" + buf;
-    send(s, msg.c_str(), msg.length(), 0);
-}
-
-bool poolAccept(int s) {
-    char resp[1024];
-    int n = recv(s, resp, 1023, 0);
-    if (n > 0 && strstr(resp, "accepted")) { last_pool_response = true; return true; }
-    last_pool_response = false;
-    return false;
-}
-
-// ============================================================
-// WALLET – Sends work to pool and waits for approval
-// ============================================================
-
-bool walletSendToPool(const string& hash, int nonce, int sock) {
-    if (sock < 0) {
-        cout << "⚠️ Wallet: No connection to pool.\n";
-        return false;
-    }
-    
-    cout << "📤 Wallet: Sending work to pool... (Nonce: " << nonce << ")\n";
-    poolSubmit(sock, hash, nonce);
-    
-    cout << "⏳ Wallet: Waiting for approval from pool...\n";
-    bool approved = poolAccept(sock);
-    
-    if (approved) {
-        cout << "✅ Wallet: Approved by pool.\n";
-        return true;
-    } else {
-        cout << "❌ Wallet: Rejected by pool.\n";
-        return false;
-    }
-}
-
-// ============================================================
-// RIG – Collects data, filters, hashes
-// ============================================================
-
-string processData(const string& raw, int sock) {
-    string binary = toBinary(raw);
-    
-    // Sluice-Bench: Check against reference database
-    if (!hasXMRPattern(binary) && !hasBTCPattern(binary)) {
-        cout << "🚫 Sluice-Bench: No pattern match. Rejected.\n";
-        return "";
-    }
-    
-    // Egg Shorter: Clean the data
-    string washed = eggShorter(binary);
-    if (washed.empty()) {
-        cout << "🚫 Egg Shorter: Empty. Rejected.\n";
-        return "";
-    }
-    
-    // Generate HS256 (SHA-256)
-    string hash = sha256(washed);
-    cout << "🔍 Rig: HS256 generated: " << hash.substr(0, 16) << "...\n";
-    
-    // Wallet: Send to pool and wait for approval
-    XSA_COUNTER.fetch_add(1);
-    TOTAL_SHARES.fetch_add(1);
-    
-    bool approved = walletSendToPool(hash, XSA_COUNTER.load(), sock);
-    
-    if (approved) {
-        double earn = 0.0000000001;
-        { lock_guard<mutex> lock(earnings_mutex); TOTAL_EARNINGS += earn; }
-        cout << "💰 Wallet: Approved! Deposited to treasury.\n";
-    } else {
-        cout << "❌ Wallet: Rejected. No deposit.\n";
-    }
-    
-    return hash;
-}
-
-// ============================================================
-// WEB SERVER – Index (King's view)
-// ============================================================
-
-class WebServer {
-    int fd; bool running;
-public:
-    WebServer() : fd(-1), running(true) {}
-    void start() {
-        thread([&]() {
-            fd = socket(AF_INET, SOCK_STREAM, 0);
-            if (fd < 0) return;
-            int opt = 1;
-            setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
-            struct sockaddr_in addr;
-            addr.sin_family = AF_INET;
-            addr.sin_addr.s_addr = INADDR_ANY;
-            addr.sin_port = htons(8080);
-            if (bind(fd, (struct sockaddr*)&addr, sizeof(addr)) < 0) { close(fd); return; }
-            listen(fd, 10);
-            cout << "🌐 Index: http://127.0.0.1:8080\n";
-
-            string html = R"HTML(
 <!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Canal-Mardukh™</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box;}
-body{background:#0a0a0a;color:#e0e0e0;font-family:'Segoe UI',Arial,sans-serif;min-height:100vh;padding:20px;display:flex;justify-content:center;align-items:center;}
-.container{max-width:1100px;width:100%;background:#111;border:2px solid #A66A00;border-radius:16px;padding:30px;}
-h1{color:#FFD27A;font-size:2rem;letter-spacing:2px;}
-h1 small{font-size:0.7rem;color:#888;display:block;}
-.status{font-weight:bold;font-size:0.85rem;margin:10px 0;display:flex;align-items:center;gap:8px;}
-.status .dot{display:inline-block;width:10px;height:10px;border-radius:50%;}
-.status.online .dot{background:#7CFC7C;animation:pulse 1.5s ease-in-out infinite;}
-.status.offline .dot{background:#ff6b6b;}
-@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
-.wallet-display{background:#0a0a0a;border:1px solid #222;border-radius:8px;padding:12px 15px;margin:15px 0;word-break:break-all;font-family:'Courier New',monospace;font-size:0.75rem;color:#88ffaa;}
-.wallet-display .label{color:#888;font-size:0.6rem;text-transform:uppercase;display:block;margin-bottom:3px;}
-.dial-counter{text-align:center;padding:15px 0 10px;font-size:3.5rem;font-weight:bold;color:#FFD27A;font-family:'Courier New',monospace;}
-.dial-counter .highlight{color:#00ff88;}
-.dial-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;background:#0a0a0a;border:1px solid #222;border-radius:8px;padding:15px;margin:15px 0;}
-.dial-stat{text-align:center;}
-.dial-stat .value{font-size:1.6rem;font-weight:bold;font-family:'Courier New',monospace;color:#FFD27A;}
-.dial-stat .value.accepted{color:#7CFC7C;}
-.dial-stat .value.rejected{color:#ff6b6b;}
-.dial-stat .value.earnings{color:#00ff88;}
-.dial-stat .label{font-size:0.55rem;color:#888;text-transform:uppercase;}
-.pool-selector{background:#0a0a0a;border:1px solid #222;border-radius:8px;padding:12px 15px;margin:15px 0;}
-.pool-selector select{width:100%;padding:10px;background:#111;border:1px solid #333;border-radius:6px;color:#e0e0e0;font-size:0.85rem;outline:none;cursor:pointer;}
-.log-window{background:#0a0a0a;border:1px solid #1a1a1a;border-radius:8px;padding:15px;min-height:300px;max-height:500px;overflow-y:auto;font-family:'Courier New',monospace;font-size:0.8rem;line-height:1.8;color:#aaa;margin:15px 0;}
-.log-entry{padding:2px 0;border-bottom:1px solid rgba(255,255,255,0.03);}
-.log-entry .time{color:#555;margin-right:10px;}
-.log-entry .accepted{color:#7CFC7C;}
-.log-entry .rejected{color:#ff6b6b;}
-.log-entry .submitted{color:#FFD27A;}
-.log-entry .deposited{color:#00ff88;}
-.log-entry .info{color:#66ccff;}
-.log-entry .error{color:#ff6b6b;font-weight:bold;}
-.btn-group{display:flex;gap:10px;flex-wrap:wrap;margin:15px 0;}
-button{background:transparent;color:#e0e0e0;border:1px solid #444;padding:10px 22px;border-radius:6px;font-size:0.8rem;cursor:pointer;flex:1;min-width:80px;}
-button:hover{background:rgba(166,106,0,0.15);border-color:#A66A00;}
-button.primary{border-color:#A66A00;color:#FFD27A;}
-button.danger{border-color:#6a2a2a;color:#ff6b6b;}
-.footer{text-align:center;margin-top:20px;padding-top:15px;border-top:1px solid #1a1a1a;font-size:0.7rem;color:#555;}
-</style>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Canal-Mardukh™ – King's View</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{background:#0a0a0a;color:#e0e0e0;font-family:'Segoe UI',Arial,sans-serif;min-height:100vh;padding:20px;display:flex;justify-content:center;align-items:center;}
+        .container{max-width:1100px;width:100%;background:#111;border:2px solid #A66A00;border-radius:16px;padding:30px;box-shadow:0 0 60px rgba(166,106,0,0.1);}
+        .header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;border-bottom:1px solid #222;padding-bottom:15px;margin-bottom:20px;}
+        h1{color:#FFD27A;font-size:2rem;letter-spacing:2px;}
+        h1 small{font-size:0.7rem;color:#888;display:block;letter-spacing:1px;}
+        .status{font-weight:bold;font-size:0.85rem;display:flex;align-items:center;gap:8px;}
+        .status .dot{display:inline-block;width:10px;height:10px;border-radius:50%;}
+        .status.online .dot{background:#7CFC7C;animation:pulse 1.5s ease-in-out infinite;}
+        .status.offline .dot{background:#ff6b6b;}
+        @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+        .wallet-display{background:#0a0a0a;border:1px solid #222;border-radius:8px;padding:12px 15px;margin-bottom:20px;word-break:break-all;font-family:'Courier New',monospace;font-size:0.75rem;color:#88ffaa;}
+        .wallet-display .label{color:#888;font-size:0.6rem;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:3px;}
+        .dial-counter{text-align:center;padding:15px 0 10px;font-size:3.5rem;font-weight:bold;color:#FFD27A;font-family:'Courier New',monospace;text-shadow:0 0 30px rgba(255,210,122,0.1);}
+        .dial-counter .highlight{color:#00ff88;text-shadow:0 0 40px rgba(0,255,136,0.15);}
+        .dial-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;background:#0a0a0a;border:1px solid #222;border-radius:8px;padding:15px;margin-bottom:20px;}
+        @media(max-width:500px){.dial-stats{grid-template-columns:repeat(2,1fr);}}
+        .dial-stat{text-align:center;}
+        .dial-stat .value{font-size:1.6rem;font-weight:bold;font-family:'Courier New',monospace;color:#FFD27A;}
+        .dial-stat .value.accepted{color:#7CFC7C;}
+        .dial-stat .value.rejected{color:#ff6b6b;}
+        .dial-stat .value.earnings{color:#00ff88;}
+        .dial-stat .label{font-size:0.55rem;color:#888;text-transform:uppercase;letter-spacing:0.5px;}
+        .pool-selector{background:#0a0a0a;border:1px solid #222;border-radius:8px;padding:12px 15px;margin-bottom:20px;}
+        .pool-selector label{color:#888;font-size:0.6rem;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:5px;}
+        .pool-selector select{width:100%;padding:10px;background:#111;border:1px solid #333;border-radius:6px;color:#e0e0e0;font-size:0.85rem;outline:none;cursor:pointer;}
+        .pool-selector select:focus{border-color:#A66A00;}
+        .log-window{background:#0a0a0a;border:1px solid #1a1a1a;border-radius:8px;padding:15px;min-height:300px;max-height:500px;overflow-y:auto;font-family:'Courier New',monospace;font-size:0.8rem;line-height:1.8;color:#aaa;margin-bottom:20px;}
+        .log-window::-webkit-scrollbar{width:4px;}
+        .log-window::-webkit-scrollbar-track{background:#0a0a0a;}
+        .log-window::-webkit-scrollbar-thumb{background:#A66A00;border-radius:4px;}
+        .log-entry{padding:2px 0;border-bottom:1px solid rgba(255,255,255,0.03);}
+        .log-entry .time{color:#555;margin-right:10px;}
+        .log-entry .accepted{color:#7CFC7C;}
+        .log-entry .rejected{color:#ff6b6b;}
+        .log-entry .submitted{color:#FFD27A;}
+        .log-entry .deposited{color:#00ff88;}
+        .log-entry .info{color:#66ccff;}
+        .log-entry .error{color:#ff6b6b;font-weight:bold;}
+        .btn-group{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:15px;}
+        button{background:transparent;color:#e0e0e0;border:1px solid #444;padding:10px 22px;border-radius:6px;font-size:0.8rem;cursor:pointer;transition:0.3s;flex:1;min-width:80px;}
+        button:hover{background:rgba(166,106,0,0.15);border-color:#A66A00;}
+        button.primary{border-color:#A66A00;color:#FFD27A;}
+        button.danger{border-color:#6a2a2a;color:#ff6b6b;}
+        .footer{text-align:center;margin-top:20px;padding-top:15px;border-top:1px solid #1a1a1a;font-size:0.7rem;color:#555;}
+        .footer strong{color:#FFD27A;}
+    </style>
 </head>
 <body>
+
 <div class="container">
     <div class="header">
         <div>
-            <h1>⚖️ Canal-Mardukh™<small>King's Court</small></h1>
+            <h1>⚖️ Canal-Mardukh™<small>Part of the Mardukh System™</small></h1>
             <div class="status offline" id="statusBar"><span class="dot"></span> <span id="statusText">OFFLINE</span></div>
         </div>
-        <div style="color:#888;">v0.2.0</div>
+        <div style="color:#888;font-size:0.8rem;">v0.2.0</div>
     </div>
+
     <div class="wallet-display">
         <span class="label">📬 Minister's Treasury (Wallet)</span>
         45ktWDeTNtUcVMXfJRKS6bbXMznMAStZFX6niJHcVy9uQk132bHJ21QTC5AKvqyx9XJN5e7mPc3vViyGnB2BM6DD1ZoAoZb
     </div>
+
     <div class="dial-counter">X-SA-<span class="highlight" id="dialCounter">000</span></div>
+
     <div class="dial-stats">
         <div class="dial-stat"><div class="value" id="sharesDisplay">0</div><div class="label">📦 Shares</div></div>
         <div class="dial-stat"><div class="value accepted" id="acceptedDisplay">0</div><div class="label">✅ Accepted</div></div>
         <div class="dial-stat"><div class="value rejected" id="rejectedDisplay">0</div><div class="label">🚫 Rejected</div></div>
         <div class="dial-stat"><div class="value earnings" id="earningsDisplay">0.00000000</div><div class="label">💰 Earned (XMR)</div></div>
     </div>
+
     <div class="pool-selector">
         <label>⛏️ Select Mining Pool</label>
         <select id="poolSelect">
@@ -321,184 +95,112 @@ button.danger{border-color:#6a2a2a;color:#ff6b6b;}
             </optgroup>
         </select>
     </div>
+
     <div class="log-window" id="logWindow">
         <div class="log-entry"><span class="time">⏳</span> <span class="info">King's court ready.</span></div>
         <div class="log-entry"><span class="time">⏳</span> <span class="info">Minister is waiting for the Worker.</span></div>
+        <div class="log-entry"><span class="time">⏳</span> <span class="error">⚠️ Wallet offline – run ./marduk</span></div>
     </div>
+
     <div class="btn-group">
         <button class="primary" onclick="fetchRealData()">⟳ ASK THE MINISTER</button>
         <button class="danger" onclick="clearLog()">🗑️ CLEAR LOG</button>
     </div>
+
     <div class="footer">Designed by <strong>Seliim Ahmed</strong> · Copyright © 2026</div>
 </div>
+
 <script>
+// ============================================================
+// KING'S VIEW – ONLY communicates with the Minister (Wallet)
+// ============================================================
+
 const WALLET_URL = "http://127.0.0.1:8080/status";
 let shares=0, accepted=0, rejected=0, earned=0, counter=0;
 
-function addLog(msg,type){
-    const w=document.getElementById('logWindow');
-    const t=new Date().toLocaleTimeString();
-    const d=document.createElement('div');
-    d.className='log-entry';
-    const c=type==='accepted'?'accepted':type==='rejected'?'rejected':type==='submitted'?'submitted':type==='deposited'?'deposited':type==='error'?'error':'info';
-    d.innerHTML='<span class="time">'+t+'</span> <span class="'+c+'">'+msg+'</span>';
-    w.appendChild(d); w.scrollTop=w.scrollHeight;
-    while(w.children.length>50)w.removeChild(w.firstChild);
+function addLog(msg, type='info') {
+    const w = document.getElementById('logWindow');
+    const t = new Date().toLocaleTimeString();
+    const d = document.createElement('div');
+    d.className = 'log-entry';
+    const cls = type === 'accepted' ? 'accepted' :
+                type === 'rejected' ? 'rejected' :
+                type === 'submitted' ? 'submitted' :
+                type === 'deposited' ? 'deposited' :
+                type === 'error' ? 'error' : 'info';
+    d.innerHTML = `<span class="time">${t}</span> <span class="${cls}">${msg}</span>`;
+    w.appendChild(d);
+    w.scrollTop = w.scrollHeight;
+    while (w.children.length > 50) w.removeChild(w.firstChild);
 }
 
-function updateDisplay(){
-    document.getElementById('dialCounter').textContent=String(counter).padStart(3,'0');
-    document.getElementById('sharesDisplay').textContent=shares;
-    document.getElementById('acceptedDisplay').textContent=accepted;
-    document.getElementById('rejectedDisplay').textContent=rejected;
-    document.getElementById('earningsDisplay').textContent=earned.toFixed(8);
+function updateDisplay() {
+    document.getElementById('dialCounter').textContent = String(counter).padStart(3, '0');
+    document.getElementById('sharesDisplay').textContent = shares;
+    document.getElementById('acceptedDisplay').textContent = accepted;
+    document.getElementById('rejectedDisplay').textContent = rejected;
+    document.getElementById('earningsDisplay').textContent = earned.toFixed(8);
 }
 
-function setStatus(online){
-    const bar=document.getElementById('statusBar');
-    const text=document.getElementById('statusText');
-    if(online){bar.className='status online';text.textContent='ONLINE';}
-    else{bar.className='status offline';text.textContent='OFFLINE';}
-}
-
-async function fetchRealData(){
-    addLog('👑 King: "Minister, what is the progress?"','info');
-    try{
-        const res=await fetch(WALLET_URL);
-        if(!res.ok)throw new Error('HTTP '+res.status);
-        const data=await res.json();
-        shares=data.shares||0; accepted=data.accepted||0; rejected=data.rejected||0;
-        counter=data.counter||0; earned=data.earnings||0;
-        const poolResp=data.pool_response||'unknown';
-        if(poolResp==='accepted'){
-            addLog('✅ Minister: "Worker came. Shares approved and deposited to treasury."','accepted');
-        }else if(poolResp==='rejected'){
-            addLog('❌ Minister: "Worker came. Shares rejected by the pool."','rejected');
-        }else if(shares===0){
-            addLog('⏳ Minister: "The Worker is here, but no shares yet."','info');
-        }else{
-            addLog('📊 Minister: "'+shares+' shares collected. '+earned.toFixed(8)+' XMR in treasury."','accepted');
-        }
-        setStatus(true); updateDisplay();
-    }catch(e){
-        setStatus(false);
-        addLog('🔇 Minister is silent (wallet offline). Start ./marduk','error');
+function setStatus(online) {
+    const bar = document.getElementById('statusBar');
+    const text = document.getElementById('statusText');
+    if (online) {
+        bar.className = 'status online';
+        text.textContent = 'ONLINE';
+    } else {
+        bar.className = 'status offline';
+        text.textContent = 'OFFLINE';
     }
 }
 
-document.getElementById('poolSelect').addEventListener('change',function(){
-    addLog('🌐 King selects pool: '+this.options[this.selectedIndex].text,'info');
-});
-
-function clearLog(){
-    document.getElementById('logWindow').innerHTML='';
-    addLog('🗑️ Log cleared.','info');
+async function fetchRealData() {
+    addLog('👑 King asks Minister: "What is the progress? Is the Worker here?"', 'info');
+    try {
+        const res = await fetch(WALLET_URL);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        shares = data.shares || 0;
+        accepted = data.accepted || 0;
+        rejected = data.rejected || 0;
+        counter = data.counter || 0;
+        earned = data.earnings || 0;
+        const poolResp = data.pool_response || 'unknown';
+        if (poolResp === 'accepted') {
+            addLog('✅ Minister reports: "Worker came. Shares approved and deposited to treasury."', 'accepted');
+        } else if (poolResp === 'rejected') {
+            addLog('❌ Minister reports: "Worker came. Shares rejected by the pool."', 'rejected');
+        } else if (shares === 0) {
+            addLog('⏳ Minister reports: "The Worker is here, but no shares have been brought yet."', 'info');
+        } else {
+            addLog(`📊 Minister reports: "${shares} shares collected. ${earned.toFixed(8)} XMR in treasury."`, 'accepted');
+        }
+        setStatus(true);
+        updateDisplay();
+    } catch (e) {
+        setStatus(false);
+        addLog(`🔇 Minister is silent (wallet offline): ${e.message}`, 'error');
+        addLog('⚠️ King: "The Minister is not responding. Start the wallet with ./marduk"', 'error');
+    }
 }
 
-addLog('🚀 King\'s court initialized.','info');
-addLog('💡 Click "ASK THE MINISTER" for updates.','info');
-updateDisplay(); setStatus(false);
-setInterval(fetchRealData,3000);
+document.getElementById('poolSelect').addEventListener('change', function() {
+    const selected = this.options[this.selectedIndex].text;
+    addLog(`🌐 King selects pool: ${selected}`, 'info');
+});
+
+function clearLog() {
+    document.getElementById('logWindow').innerHTML = '';
+    addLog('🗑️ Log cleared.', 'info');
+}
+
+addLog('🚀 King\'s court initialized.', 'info');
+addLog('💡 Click "ASK THE MINISTER" for updates.', 'info');
+addLog('⚠️ Ensure the wallet is running (./marduk).', 'error');
+updateDisplay();
+setStatus(false);
+setInterval(fetchRealData, 3000);
 fetchRealData();
 </script>
 </body>
 </html>
-)HTML";
-
-            while (running) {
-                struct sockaddr_in cli;
-                socklen_t len = sizeof(cli);
-                int client = accept(fd, (struct sockaddr*)&cli, &len);
-                if (client < 0) continue;
-                char buf[4096] = {0};
-                recv(client, buf, 4095, 0);
-                string req(buf), path = "/";
-                if (req.find("GET ") != string::npos) {
-                    size_t s = req.find("GET ") + 4, e = req.find(" ", s);
-                    if (e != string::npos) path = req.substr(s, e - s);
-                }
-                string res;
-                if (path == "/status" || path == "/status/") {
-                    double earn;
-                    { lock_guard<mutex> lock(earnings_mutex); earn = TOTAL_EARNINGS; }
-                    string json = "{";
-                    json += "\"shares\":" + to_string(TOTAL_SHARES.load()) + ",";
-                    json += "\"earnings\":" + to_string(earn) + ",";
-                    json += "\"accepted\":" + to_string(TOTAL_SHARES.load()) + ",";
-                    json += "\"rejected\":0,";
-                    json += "\"counter\":" + to_string(XSA_COUNTER.load()) + ",";
-                    json += "\"pool_response\":\"" + string(last_pool_response ? "accepted" : "rejected") + "\",";
-                    json += "\"real_earnings\":" + to_string(earn) + ",";
-                    json += "\"status\":\"online\"";
-                    json += "}";
-                    res = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n\r\n" + json;
-                } else {
-                    res = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" + html;
-                }
-                send(client, res.c_str(), res.size(), 0);
-                close(client);
-            }
-            close(fd);
-        }).detach();
-    }
-    void stop() { running = false; }
-};
-
-// ============================================================
-// RIG – Auto-generates data (simulates data flow)
-// ============================================================
-
-vector<string> sampleData = {
-    "BLOCK_12345", "TX_ABCDEF", "MINER_001", "HASH_7890",
-    "DATA_2025", "SYSTEM_INIT_ERR", "PING_OK", "DATA_CHUNK_A",
-    "AUTH_FAIL_RETRY", "SYS_REBOOT", "MEMPOOL_TX", "BLOCK_HEADER",
-    "TRANSACTION_001", "MERKLE_ROOT", "NONCE_123", "DIFFICULTY_456"
-};
-
-void autoGenerate(int sock) {
-    int idx = 0;
-    while (true) {
-        string data = sampleData[idx % sampleData.size()];
-        idx++;
-        cout << "🔍 Worker: Collected: " << data << "\n";
-        processData(data, sock);
-        this_thread::sleep_for(chrono::seconds(3));
-    }
-}
-
-// ============================================================
-// MAIN – Runs autonomously
-// ============================================================
-
-int main() {
-    cout << "\n════════════════════════════════════════════════════\n";
-    cout << "⚖️ CANAL-MARDUKH™ — COMPLETE SYSTEM\n";
-    cout << "════════════════════════════════════════════════════\n";
-    cout << "📤 Wallet: " << WALLET << "\n";
-    cout << "🌊 Pool: " << POOL_HOST << ":" << POOL_PORT << "\n";
-    cout << "────────────────────────────────────────────────────\n";
-
-    int sock = connectPool();
-    if (sock >= 0) {
-        poolLogin(sock);
-        cout << "✅ Wallet connected to pool\n";
-    } else {
-        cout << "⚠️ Wallet offline — no pool connection\n";
-    }
-
-    WebServer web;
-    web.start();
-
-    cout << "────────────────────────────────────────────────────\n";
-    cout << "⛏️ Worker: Collecting data from canal...\n";
-    cout << "📤 Wallet: Sending work to pool and waiting for approval...\n";
-    cout << "🌐 Index: http://127.0.0.1:8080\n";
-    cout << "────────────────────────────────────────────────────\n";
-
-    thread auto_thread(autoGenerate, sock);
-    while (true) this_thread::sleep_for(chrono::seconds(1));
-
-    web.stop();
-    if (sock >= 0) close(sock);
-    return 0;
-}
